@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 
-using GraphDB.Contract.Core;
 using GraphDB.Core;
 
 namespace GraphDB.App
@@ -10,14 +9,21 @@ namespace GraphDB.App
     /// </summary>
     public partial class MainWindow : Window
     {
+        private Graph myGraph;
+
         public MainWindow()
         {
             InitializeComponent();
+            DataInit();
         }
 
         private void DataInit()
         {
-            IEdge edgeA = new Edge( "Link");
+            myGraph = new Graph("db.xml");
+
+            //myGraph = new Graph();
+
+
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Xml;
 
 using GraphDB.Contract.Core;
+using GraphDB.Contract.Serial;
 using GraphDB.Utility;
 
 namespace GraphDB.Core
@@ -10,6 +11,8 @@ namespace GraphDB.Core
         //成员变量
         private INode myFromNode;//连边起点
         private INode myToNode;//连边终点
+        private string myFromGuid;//连边起点GUID
+        private string myToGuid;//连边终点GUID
         private readonly string myAttribute;//连边类型
         private string myValue;//连边取值
 
@@ -22,7 +25,8 @@ namespace GraphDB.Core
             }
             set
             {
-                myFromNode = value; 
+                myFromNode = value;
+                myFromGuid = value.Guid;
             }
         }
         public INode To
@@ -34,9 +38,36 @@ namespace GraphDB.Core
             set
             {
                 myToNode = value;
+                myToGuid = value.Guid;
             }
         }
+        [Serializable]
+        public string FromGuid
+        {
+            get
+            {
+                return myFromGuid;
+            }
+            set
+            {
+                myFromGuid = value;
+            }
+        }
+        [Serializable]
+        public string ToGuid
+        {
+            get
+            {
+                return myToGuid;
+            }
+            set
+            {
+                myToGuid = value;
+            }
+        }
+        [Serializable]
         public string Attribute => myAttribute;
+        [Serializable]
         public string Value
         {
             get
@@ -61,50 +92,10 @@ namespace GraphDB.Core
         {
             //取出制定标签的Inner Text
             var newType = xNode.GetText("Attribute");
-            if (newType == "")
-            {
-                newType = "关联";
-            }
             var newValue = xNode.GetText("Value");
-            if (newValue == "")
-            {
-                newValue = "1";
-            }
             //赋值与初始化
             myAttribute = newType;
             myValue = newValue;
-        }
-
-        //将连边数据保存为xml格式
-        public virtual XmlElement ToXML(ref XmlDocument doc)
-        {
-            XmlElement curEdge = doc.CreateElement("Edge");         //创建连边元素
-            XmlElement typeXML, valueXML, startXML, endXML;
-            XmlText typeTxt, valueTxt, startTxt, endTxt;
-
-            //节点类型
-            typeXML = doc.CreateElement("Attribute");
-            valueXML = doc.CreateElement("Value");
-            //节点位置
-            startXML = doc.CreateElement("Start");
-            endXML = doc.CreateElement("End");
-            //创建各属性的文本元素
-            typeTxt = doc.CreateTextNode(Attribute);               
-            valueTxt = doc.CreateTextNode(Value);
-            startTxt = doc.CreateTextNode(From.Guid);
-            endTxt = doc.CreateTextNode(To.Guid);
-            //将标题元素赋予文本内容
-            typeXML.AppendChild(typeTxt);                                    
-            valueXML.AppendChild(valueTxt);
-            startXML.AppendChild(startTxt);
-            endXML.AppendChild(endTxt);
-            //向当前节点中加入各属性节点
-            curEdge.AppendChild(typeXML);                                   
-            curEdge.AppendChild(valueXML);
-            curEdge.AppendChild(startXML);
-            curEdge.AppendChild(endXML);
-
-            return curEdge;
         }
     }
 }

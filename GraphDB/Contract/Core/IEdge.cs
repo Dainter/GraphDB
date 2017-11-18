@@ -1,4 +1,5 @@
-﻿namespace GraphDB.Contract.Core
+﻿
+namespace GraphDB.Contract.Core
 {
     public interface IEdge
     {

@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphDB", "GraphDB\GraphDB.csproj", "{BC7A8473-6D9C-4960-958E-9DE92FCC367A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphDB.App", "GraphDB.App\GraphDB.App.csproj", "{5FF3191B-4FFB-424B-B478-6A878AD90DBB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BC7A8473-6D9C-4960-958E-9DE92FCC367A} = {BC7A8473-6D9C-4960-958E-9DE92FCC367A}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
