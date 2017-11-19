@@ -34,16 +34,16 @@ namespace GraphDB.Core
         //节点类Node构造函数
         public Node(string guid, string name )    
         {
-            myGuid = guid;
-            myName = name;
+            myGuid = guid ?? "";
+            myName = name ?? "";
             myOutLink = new List<IEdge>();
             myInLink = new List<IEdge>();
         }
 
         public Node(INode oriNode )
         {
-            myGuid = oriNode.Guid;
-            myName = oriNode.Name;
+            myGuid = oriNode != null ? oriNode.Guid : "";
+            myName = oriNode != null ? oriNode.Name : "";
             myOutLink = new List<IEdge>();
             myInLink = new List<IEdge>();
         }
@@ -205,6 +205,10 @@ namespace GraphDB.Core
         //查找目标为指定GUID的连边
         public List<IEdge> GetEdgesByGuid(string nodeGuid, EdgeDirection direction)
         {
+            if( nodeGuid == null )
+            {
+                return new List<IEdge>();
+            }
             if (direction == EdgeDirection.In)
             {
                 return InBound.Where(x => x.From.Guid == nodeGuid).ToList();
@@ -219,6 +223,10 @@ namespace GraphDB.Core
         //查找类型为指定Type的连边
         public List<IEdge> GetEdgesByType(string edgeType, EdgeDirection direction)
         {
+            if (edgeType == null)
+            {
+                return new List<IEdge>();
+            }
             if (direction == EdgeDirection.In)
             {
                 return InBound.Where(x => x.From.Guid == edgeType).ToList();

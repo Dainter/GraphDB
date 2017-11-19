@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Xml;
 
@@ -64,15 +65,17 @@ namespace GraphDB.Utility
 
         private static Assembly GetAssembly( string typeName )
         {
-            foreach( string curItem in Properties.Settings.Default.SerialAssemblyList )
+            string path = Assembly.GetExecutingAssembly().Location;
+            string asmName = Path.GetFileName( path );
+            foreach ( string curItem in Properties.Settings.Default.SerialAssemblyList )
             {
-                Assembly asm = Assembly.Load(curItem);
+                Assembly asm = Assembly.LoadFile(path.Replace( asmName, curItem ));
                 if( asm.ExportedTypes.Any( x => x.FullName == typeName ) )
                 {
                     return asm;
                 }
             }
-            return null;
+            throw new FileLoadException("No valid assembly has been found.");
         }
 
 

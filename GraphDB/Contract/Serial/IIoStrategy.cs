@@ -2,7 +2,7 @@ using System.Xml;
 
 using GraphDB.Utility;
 
-namespace GraphDB.Contract
+namespace GraphDB.Contract.Serial
 {
     public interface IIoStrategy//文件读写算法接口
     {

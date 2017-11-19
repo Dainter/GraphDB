@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 
-using GraphDB.Contract;
 using GraphDB.Contract.Core;
+using GraphDB.Contract.Serial;
 using GraphDB.IO;
 using GraphDB.Utility;
 
@@ -25,17 +26,17 @@ namespace GraphDB.Core
             myEdgeList = new List<IEdge>();
             myIohandler = new XMLStrategy("db.xml");
 
-            INode nodeA = new Node(Guid.NewGuid().ToString(), "NodeA");
-            myNodeList.Add(nodeA.Guid, nodeA);
-            INode nodeB = new Node(Guid.NewGuid().ToString(), "NodeB");
-            myNodeList.Add(nodeB.Guid, nodeB);
-            IEdge edgeA = new Edge("LinkA");
-            edgeA.From = nodeA;
-            edgeA.To = nodeB;
-            nodeA.AddEdge(edgeA);
-            nodeB.RegisterInbound(edgeA);
-            myEdgeList.Add(edgeA);
-            SaveDataBase();
+            //INode nodeA = new Node(Guid.NewGuid().ToString(), "NodeA");
+            //myNodeList.Add(nodeA.Guid, nodeA);
+            //INode nodeB = new Node(Guid.NewGuid().ToString(), "NodeB");
+            //myNodeList.Add(nodeB.Guid, nodeB);
+            //IEdge edgeA = new Edge("LinkA");
+            //edgeA.From = nodeA;
+            //edgeA.To = nodeB;
+            //nodeA.AddEdge(edgeA);
+            //nodeB.RegisterInbound(edgeA);
+            //myEdgeList.Add(edgeA);
+            //SaveDataBase();
         }
 
         public Graph( string path )
@@ -71,9 +72,10 @@ namespace GraphDB.Core
                 {
                     throw new Exception($"Error found during Deserialize. XML:{curItem}");
                 }
-                myEdgeList.Add(newEdge);
+                //Add Link
+                AddEdge(newEdge.FromGuid, newEdge.ToGuid, newEdge);
             }
-            //Add Link
+            return;
         }
 
         public void SaveDataBase()
@@ -115,5 +117,148 @@ namespace GraphDB.Core
             doc.AppendChild(root);
             return doc;
         }
+
+        //加入节点
+        private void AddNode(INode newNode)
+        {
+            if( newNode == null )
+            {
+                return;
+            }
+            //节点加入节点列表
+            myNodeList.Add(newNode.Guid, newNode);
+        }
+
+        //删除节点 by Guid
+        private void RemoveNode(string guid)
+        {
+            if (guid == null)
+            {
+                return;
+            }
+            INode curNode = myNodeList[ guid ];
+            if( curNode == null )
+            {
+                return;
+            }
+            RemoveNode( curNode );
+        }
+
+        //删除节点 by Node
+        private void RemoveNode(INode curNode)
+        {
+            //清除节点所有连边
+            ClearUnusedEdge(curNode.ClearEdge());
+            //从节点列表中移除节点
+            myNodeList.Remove(curNode.Guid);
+        }
+
+        //加入连边 by Guid
+        private void AddEdge( string curNodeGuid, string tarNodeGuid, IEdge newEdge )
+        {
+            if (curNodeGuid == null || tarNodeGuid == null || newEdge == null)
+            {
+                return;
+            }
+            INode curNode = myNodeList[curNodeGuid];
+            if (curNode == null)
+            {
+                return;
+            }
+            INode tarNode = myNodeList[tarNodeGuid];
+            if (tarNode == null)
+            {
+                return;
+            }
+            AddEdge( curNode, tarNode, newEdge);
+        }
+
+        //加入连边 by Node
+        private void AddEdge( INode curNode, INode tarNode, IEdge newEdge )
+        {
+            //连边的头指针指向起节点
+            newEdge.From = curNode;
+            //连边的尾指针指向目标节点
+            newEdge.To = tarNode;
+            //将新连边加入起始节点的outbound
+            if (curNode.AddEdge(newEdge) == false)
+            {
+                return;
+            }
+            //将新连边加入目标节点的Inbound
+            if (tarNode.RegisterInbound(newEdge) == false)
+            {
+                return;
+            }
+            //全部完成后将连边加入网络连边列表
+            myEdgeList.Add(newEdge);
+        }
+
+        //移除连边 by Guid
+        private void RemoveEdge(string curNodeGuid, string tarNodeGuid, string attribute)
+        {
+            if (curNodeGuid == null || tarNodeGuid == null || attribute == null)
+            {
+                return;
+            }
+            INode curNode = myNodeList[curNodeGuid];
+            if (curNode == null)
+            {
+                return;
+            }
+            INode tarNode = myNodeList[tarNodeGuid];
+            if (tarNode == null)
+            {
+                return;
+            }
+            RemoveEdge(curNode, tarNode, attribute);
+        }
+
+        //移除连边 by Node
+        private void RemoveEdge(INode curNode, INode tarNode, string attribute)
+        {
+            //从起始节点的出边中遍历,查找终止节点编号和目标节点编号和类型一致的连边
+            IEdge curEdge = curNode.OutBound.First(x => x.To.Guid == tarNode.Guid && x.Attribute == attribute);
+            if (curEdge == null)
+            {//没找到直接返回
+                return;
+            }
+            //起始节点Outbound中移除连边
+            curNode.RemoveEdge(curEdge);
+            //从终止节点InBound中注销连边
+            tarNode.UnRegisterInbound(curEdge);
+            //全部完成后，从总连边列表中移除该边
+            myEdgeList.Remove(curEdge);
+        }
+
+        //删除所有节点和连边
+        public void ClearAll()
+        {
+            myEdgeList.Clear();
+            myNodeList.Clear();
+        }
+
+        //删除所有被解除绑定的连边
+        private void ClearUnusedEdge(List<IEdge> unusedList)
+        {
+            if (unusedList == null)
+            {
+                return;
+            }
+            //将入参列表中所有连边从总连边列表中删除
+            foreach (IEdge edge in unusedList)
+            {
+                myEdgeList.Remove(edge);
+            }
+            //清空入参列表本身内容
+            unusedList.Clear();
+        }
+
+        //删除所有连边
+        public void ClearAllEdge()
+        {
+            myEdgeList.Clear();
+        }
+
     }
 }

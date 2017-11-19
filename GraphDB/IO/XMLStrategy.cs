@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using System.Xml;
 
-using GraphDB.Contract;
+using GraphDB.Contract.Serial;
 using GraphDB.Utility;
 
 namespace GraphDB.IO

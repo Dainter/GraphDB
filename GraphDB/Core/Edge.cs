@@ -84,6 +84,8 @@ namespace GraphDB.Core
         //连边类Edge构造函数
         public Edge(string newAttribute, string newValue = "1")//构造函数 对三个变量进行赋值
         {
+            myFromGuid = "";
+            myToGuid = "";
             myAttribute = newAttribute;
             myValue = newValue;
         }
@@ -91,11 +93,10 @@ namespace GraphDB.Core
         public Edge( XmlElement xNode)//构造函数 对三个变量进行赋值
         {
             //取出制定标签的Inner Text
-            var newType = xNode.GetText("Attribute");
-            var newValue = xNode.GetText("Value");
-            //赋值与初始化
-            myAttribute = newType;
-            myValue = newValue;
+            myFromGuid = xNode.GetText("FromGuid");
+            myToGuid = xNode.GetText("ToGuid");
+            myAttribute = xNode.GetText("Attribute");
+            myValue = xNode.GetText("Value");
         }
     }
 }

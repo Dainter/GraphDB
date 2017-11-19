@@ -43,7 +43,7 @@
     <Compile Include="Contract\Core\IEdge.cs" />
     <Compile Include="Contract\Core\INode.cs" />
     <Compile Include="Contract\DataType\EdgeDirection.cs" />
-    <Compile Include="Contract\IIoStrategy.cs" />
+    <Compile Include="Contract\Serial\IIoStrategy.cs" />
     <Compile Include="Contract\Serial\SerializableAttribute.cs" />
     <Compile Include="Utility\SerializableHelper.cs" />
     <Compile Include="Core\Edge.cs" />
