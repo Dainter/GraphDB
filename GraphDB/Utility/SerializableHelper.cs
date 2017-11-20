@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml;
 
+using GraphDB.Contract.Serial;
 using GraphDB.Core;
 
 using SerializableAttribute = GraphDB.Contract.Serial.SerializableAttribute;

@@ -1,4 +1,4 @@
-﻿namespace GraphDB.Utility
+﻿namespace GraphDB.Contract.Serial
 {
     public static class XmlNames
     {

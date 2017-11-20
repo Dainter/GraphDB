@@ -3,8 +3,8 @@ using System;
 using System.IO;
 using System.Xml;
 
+using GraphDB.Contract.Enum;
 using GraphDB.Contract.Serial;
-using GraphDB.Utility;
 
 namespace GraphDB.IO
 {

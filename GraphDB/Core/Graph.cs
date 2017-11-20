@@ -4,6 +4,7 @@ using System.Linq;
 using System.Xml;
 
 using GraphDB.Contract.Core;
+using GraphDB.Contract.Enum;
 using GraphDB.Contract.Serial;
 using GraphDB.IO;
 using GraphDB.Utility;

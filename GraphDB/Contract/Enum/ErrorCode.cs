@@ -1,4 +1,4 @@
-﻿namespace GraphDB.Utility
+﻿namespace GraphDB.Contract.Enum
 {
     //系统错误码
     public enum ErrorCode
@@ -23,15 +23,4 @@
         ReturnSegInvalid = 44,
         NoStartNode = 60,
     }
-
-    //修改操作选项
-    public enum ModifyOperation
-    {
-        Append = 0,
-        Replace = 1,
-        ReplaceAll = 2,
-        Delete = 3,
-    }
-
-
 }

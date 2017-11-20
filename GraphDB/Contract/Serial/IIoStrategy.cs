@@ -1,6 +1,6 @@
 using System.Xml;
 
-using GraphDB.Utility;
+using GraphDB.Contract.Enum;
 
 namespace GraphDB.Contract.Serial
 {
