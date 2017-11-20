@@ -16,6 +16,7 @@
         CreateEdgeFailed = 16,
         EdgeNotExists = 17,
         AddEdgeFailed = 18,
+        InvalidParameter = 21,
         CypherInvalid = 40,
         StartSegInvalid = 41,
         MatchSegInvalid = 42,

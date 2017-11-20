@@ -42,7 +42,7 @@
   <ItemGroup>
     <Compile Include="Contract\Core\IEdge.cs" />
     <Compile Include="Contract\Core\INode.cs" />
-    <Compile Include="Contract\DataType\EdgeDirection.cs" />
+    <Compile Include="Contract\Enum\EdgeDirection.cs" />
     <Compile Include="Contract\Enum\ModifyOperation.cs" />
     <Compile Include="Contract\Serial\IIoStrategy.cs" />
     <Compile Include="Contract\Serial\SerializableAttribute.cs" />
@@ -67,6 +67,9 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Contract\DataType\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

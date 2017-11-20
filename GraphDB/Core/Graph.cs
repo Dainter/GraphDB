@@ -177,6 +177,10 @@ namespace GraphDB.Core
         //加入连边 by Node
         private void AddEdge( INode curNode, INode tarNode, IEdge newEdge )
         {
+            if (curNode == null || tarNode == null || newEdge == null)
+            {
+                return;
+            }
             //连边的头指针指向起节点
             newEdge.From = curNode;
             //连边的尾指针指向目标节点
@@ -218,6 +222,10 @@ namespace GraphDB.Core
         //移除连边 by Node
         private void RemoveEdge(INode curNode, INode tarNode, string attribute)
         {
+            if (curNode == null || tarNode == null || attribute == null)
+            {
+                return;
+            }
             //从起始节点的出边中遍历,查找终止节点编号和目标节点编号和类型一致的连边
             IEdge curEdge = curNode.OutBound.First(x => x.To.Guid == tarNode.Guid && x.Attribute == attribute);
             if (curEdge == null)
@@ -261,5 +269,201 @@ namespace GraphDB.Core
             myEdgeList.Clear();
         }
 
+        //加入节点（接口）
+        public void AddNode(INode oriNode, out ErrorCode err)
+        {
+            if (oriNode == null )
+            {
+                err = ErrorCode.InvalidParameter;
+                return;
+            }
+            //检查节点是否已经存在“名称一致”
+            if (ContainsNode(oriNode))
+            {
+                err = ErrorCode.NodeExists;
+                return;
+            }
+            AddNode(oriNode);
+            err = ErrorCode.NoError;
+        }
+
+        //加入连边（接口）
+        public void AddEdge(string startName, string endName, IEdge newEdge, out ErrorCode err)
+        {
+            if (startName == null || endName == null || newEdge == null)
+            {
+                err = ErrorCode.InvalidParameter;
+                return;
+            }
+            //获取起始节点，不存在报错
+            var startNode = GetNodeByName(startName);
+            if (startNode == null)
+            {
+                err = ErrorCode.NodeNotExists;
+                return;
+            }
+            //获取终止节点，不存在报错
+            var endNode = GetNodeByName(endName);
+            if (endNode == null)
+            {
+                err = ErrorCode.NodeNotExists;
+                return;
+            }
+            //查找两点间是否存在相同类型关系，存在报错
+            if (ContainsEdge(startNode, endNode, newEdge))
+            {
+                err = ErrorCode.EdgeExists;
+                return;
+            }
+            //在两点间加入新边
+            AddEdge(startNode, endNode, newEdge);
+            err = ErrorCode.NoError;
+        }
+
+        //检查节点是否已存在
+        private bool ContainsNode(INode curNode)
+        {
+            if (curNode == null )
+            {
+                return false;
+            }
+            return Nodes.Any( x => x.Value.Name == curNode.Name );
+        }
+
+        //检查连边是否已存在
+        private bool ContainsEdge(INode startNode, INode endNode, IEdge curEdge)
+        {
+            if (startNode == null || endNode == null || curEdge == null)
+            {
+                return false;
+            }
+            var query = startNode.GetEdgesByGuid( endNode.Guid, EdgeDirection.Out );
+            return query.Any(x => x.Attribute == curEdge.Attribute);
+        }
+
+        //删除节点（接口）
+        public void RemoveNode(string nodeName, out ErrorCode err)
+        {
+            if (nodeName == null )
+            {
+                err = ErrorCode.InvalidParameter;
+                return;
+            }
+            var tarNode = GetNodeByName(nodeName);
+            //检查节点是否已经存在“名称一致”
+            if (tarNode == null)
+            {
+                err = ErrorCode.NodeNotExists;
+                return;
+            }
+            RemoveNode(tarNode);
+            err = ErrorCode.NoError;
+        }
+
+        //删除连边（接口）
+        public void RemoveEdge(string startName, string endName, string attribute, out ErrorCode err)
+        {
+            if (startName == null || endName == null || attribute == null)
+            {
+                err = ErrorCode.InvalidParameter;
+                return;
+            }
+            //获取起始节点，不存在报错
+            var startNode = GetNodeByName(startName);
+            if (startNode == null)
+            {
+                err = ErrorCode.NodeNotExists;
+                return;
+            }
+            //获取终止节点，不存在报错
+            INode endNode = GetNodeByName(endName);
+            if (endNode == null)
+            {
+                err = ErrorCode.NodeNotExists;
+                return;
+            }
+            RemoveEdge( startNode, endNode, attribute);
+            err = ErrorCode.NoError;
+        }
+
+        //查询函数，返回节点列表中指定名称的节点
+        public INode GetNodeByGuid(string nodeGuid)
+        {
+            if (nodeGuid == null)
+            {
+                return null;
+            }
+            //遍历节点列表
+            return Nodes.Where(x => x.Value.Guid == nodeGuid).Select(x => x.Value).First();
+        }
+
+        //查询函数，返回节点列表中指定名称的节点
+        public INode GetNodeByName(string nodeName)
+        {
+            if (nodeName == null)
+            {
+                return null;
+            }
+            //遍历节点列表
+            return Nodes.Where(x => x.Value.Name == nodeName).Select(x => x.Value).First() ;
+        }
+
+        //查询函数，返回节点列表中指定类型的节点
+        public IEnumerable<INode> GetNodesByType(Type type)
+        {
+            if (type == null)
+            {
+                return null;
+            }
+            //遍历节点列表
+            return Nodes.Where(x => x.Value.GetType() == type).Select(x => x.Value);
+        }
+
+        //查询函数，返回节点列表中指定名称和类型的节点
+        public IEnumerable<INode> GetNodesByNameAndType(string nodeName, Type type)
+        {
+            if (nodeName == null || type == null)
+            {
+                return null;
+            }
+            //遍历节点列表
+            return Nodes.Where( x => x.Value.Name == nodeName && x.Value.GetType() == type ).Select( x => x.Value );
+        }
+
+        //查询函数，返回指定GUID的节点间的连边
+        public IEnumerable<IEdge> GetEdgesByGuid(string startGuid, string endGuid )
+        {
+            if (startGuid == null || endGuid == null)
+            {
+                return null;
+            }
+            return Edges.Where( x => x.FromGuid == startGuid && x.ToGuid == endGuid );
+        }
+
+        //查询函数，返回指定名称的节点间的连边
+        public IEnumerable<IEdge> GetEdgesByName(string startName, string endName)
+        {
+            if (startName == null || endName == null)
+            {
+                return null;
+            }
+            return Edges.Where(x => x.From.Name == startName && x.To.Name == endName);
+        }
+
+        //查询函数，返回Start开始的类型为Type的连边
+        public IEnumerable<IEdge> GetEdgesByType(string startName, string attribute)
+        {
+            if (startName == null || attribute == null)
+            {
+                return null;
+            }
+            return Edges.Where(x => x.From.Name == startName && x.Attribute == attribute);
+        }
+
+        //查询函数，返回两点之间指定Type的连边
+        public IEdge GetEdgeByType(string startName, string endName, string attribute)
+        {
+            return GetEdgesByName(startName, endName).First(x => x.Attribute == attribute);
+        }
     }
 }

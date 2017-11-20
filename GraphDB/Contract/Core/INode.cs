@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using GraphDB.Contract.Enum;
+
 namespace GraphDB.Contract.Core
 {
     public interface INode
@@ -20,5 +22,9 @@ namespace GraphDB.Contract.Core
         List<IEdge> ClearEdge();
         //Inbound注销
         bool UnRegisterInbound( IEdge curEdge );
+        //查找目标为指定GUID的连边
+        IEnumerable<IEdge> GetEdgesByGuid( string nodeGuid, EdgeDirection direction );
+        //查找类型为指定Type的连边
+        IEnumerable<IEdge> GetEdgesByType( string edgeType, EdgeDirection direction );
     }
 }

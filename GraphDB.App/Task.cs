@@ -14,7 +14,7 @@ namespace GraphDB.App
         [Serializable]
         public string Title => myTitle;
 
-        public Task( string guid, string name ) : base( guid, name )
+        public Task( string name ) : base( name )
         {
             myTitle = "Title Test";
         }

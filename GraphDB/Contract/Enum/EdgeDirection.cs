@@ -1,4 +1,4 @@
-﻿namespace GraphDB.Contract.DataType
+﻿namespace GraphDB.Contract.Enum
 {
     public enum EdgeDirection
     {

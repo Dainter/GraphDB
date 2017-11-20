@@ -3,7 +3,7 @@ using System.Linq;
 using System.Xml;
 
 using GraphDB.Contract.Core;
-using GraphDB.Contract.DataType;
+using GraphDB.Contract.Enum;
 using GraphDB.Contract.Serial;
 using GraphDB.Utility;
 
@@ -19,6 +19,7 @@ namespace GraphDB.Core
         //属性///////////////////////////////
         [Serializable]
         public string Guid => myGuid;
+
         [Serializable]
         public string Name => myName;
 
@@ -32,9 +33,9 @@ namespace GraphDB.Core
 
         //方法///////////////////////////////
         //节点类Node构造函数
-        public Node(string guid, string name )    
+        public Node( string name )    
         {
-            myGuid = guid ?? "";
+            myGuid = System.Guid.NewGuid().ToString();
             myName = name ?? "";
             myOutLink = new List<IEdge>();
             myInLink = new List<IEdge>();
@@ -42,7 +43,7 @@ namespace GraphDB.Core
 
         public Node(INode oriNode )
         {
-            myGuid = oriNode != null ? oriNode.Guid : "";
+            myGuid = oriNode != null ? oriNode.Guid : System.Guid.NewGuid().ToString();
             myName = oriNode != null ? oriNode.Name : "";
             myOutLink = new List<IEdge>();
             myInLink = new List<IEdge>();
@@ -203,7 +204,7 @@ namespace GraphDB.Core
         }
 
         //查找目标为指定GUID的连边
-        public List<IEdge> GetEdgesByGuid(string nodeGuid, EdgeDirection direction)
+        public IEnumerable<IEdge> GetEdgesByGuid(string nodeGuid, EdgeDirection direction)
         {
             if( nodeGuid == null )
             {
@@ -211,17 +212,17 @@ namespace GraphDB.Core
             }
             if (direction == EdgeDirection.In)
             {
-                return InBound.Where(x => x.From.Guid == nodeGuid).ToList();
+                return InBound.Where(x => x.From.Guid == nodeGuid);
             }
             if (direction == EdgeDirection.Out)
             {
-                return OutBound.Where(x => x.From.Guid == nodeGuid).ToList();
+                return OutBound.Where(x => x.From.Guid == nodeGuid);
             }
             return new List<IEdge>();
         }
 
         //查找类型为指定Type的连边
-        public List<IEdge> GetEdgesByType(string edgeType, EdgeDirection direction)
+        public IEnumerable<IEdge> GetEdgesByType(string edgeType, EdgeDirection direction)
         {
             if (edgeType == null)
             {
@@ -229,11 +230,11 @@ namespace GraphDB.Core
             }
             if (direction == EdgeDirection.In)
             {
-                return InBound.Where(x => x.From.Guid == edgeType).ToList();
+                return InBound.Where(x => x.From.Guid == edgeType);
             }
             if (direction == EdgeDirection.Out)
             {
-                return OutBound.Where(x => x.From.Guid == edgeType).ToList();
+                return OutBound.Where(x => x.From.Guid == edgeType);
             }
             return new List<IEdge>();
         }
