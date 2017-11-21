@@ -1,7 +1,12 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 using System.Windows;
+using System.Xml;
 
+using GraphDB.Constructor.Semantic;
 using GraphDB.Contract.Core;
+using GraphDB.Contract.Enum;
 using GraphDB.Core;
 
 namespace GraphDB.App
@@ -11,7 +16,7 @@ namespace GraphDB.App
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Graph myGraph;
+        private SemanticConstructor myGraph;
 
         public MainWindow()
         {
@@ -21,21 +26,23 @@ namespace GraphDB.App
 
         private void DataInit()
         {
-            //myGraph = new Graph("db.xml");
+            myGraph = new SemanticConstructor("Semantic.xml");
+            myGraph.ImportData(ReadFile("Siemens.txt"));
+        }
 
-            myGraph = new Graph();
-            INode nodeA = new Task( "NodeC");
-            myGraph.Nodes.Add(nodeA.Guid, nodeA);
-            INode nodeB = new Task( "NodeD");
-            myGraph.Nodes.Add(nodeB.Guid, nodeB);
-            IEdge edgeA = new RelateTo();
-            edgeA.From = nodeA;
-            edgeA.To = nodeB;
-            nodeA.AddEdge(edgeA);
-            nodeB.RegisterInbound(edgeA);
-            myGraph.Edges.Add(edgeA);
-            myGraph.SaveDataBase();
-
+        public string ReadFile(string path)
+        {
+            string content;
+            try
+            {
+                content = File.ReadAllText(path, Encoding.UTF8);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            //创建网络
+            return content;
         }
     }
 }

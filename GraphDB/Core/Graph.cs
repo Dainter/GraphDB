@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml;
 
@@ -42,15 +43,25 @@ namespace GraphDB.Core
 
         public Graph( string path )
         {
-            ErrorCode err;
             myNodeList = new Dictionary<string, INode>();
             myEdgeList = new List<IEdge>();
             myIohandler = new XMLStrategy(path);
 
-            XmlElement graph = myIohandler.ReadFile(out err);
-            if( err != ErrorCode.NoError )
+            if( !File.Exists( path ) )
             {
-                throw new Exception( $"Error found during read DB file. Error Code:{err}" );
+                SaveDataBase();
+                return;
+            }
+            GraphInit();
+        }
+
+        private void GraphInit()
+        {
+            ErrorCode err;
+            XmlElement graph = myIohandler.ReadFile(out err);
+            if (err != ErrorCode.NoError)
+            {
+                throw new Exception($"Error found during read DB file. Error Code:{err}");
             }
             var nodes = graph.GetNode(XmlNames.Nodes);
             var edges = graph.GetNode(XmlNames.Edges);
@@ -76,7 +87,6 @@ namespace GraphDB.Core
                 //Add Link
                 AddEdge(newEdge.FromGuid, newEdge.ToGuid, newEdge);
             }
-            return;
         }
 
         public void SaveDataBase()
@@ -321,6 +331,16 @@ namespace GraphDB.Core
         }
 
         //检查节点是否已存在
+        public bool ContainsNode(string nodeName)
+        {
+            if (nodeName == null)
+            {
+                return false;
+            }
+            return Nodes.Any(x => x.Value.Name == nodeName);
+        }
+
+        //检查节点是否已存在
         private bool ContainsNode(INode curNode)
         {
             if (curNode == null )
@@ -394,7 +414,12 @@ namespace GraphDB.Core
                 return null;
             }
             //遍历节点列表
-            return Nodes.Where(x => x.Value.Guid == nodeGuid).Select(x => x.Value).First();
+            var query = Nodes.Where( x => x.Value.Guid == nodeGuid ).Select( x => x.Value );
+            if (!query.Any())
+            {
+                return null;
+            }
+            return query.First();
         }
 
         //查询函数，返回节点列表中指定名称的节点
@@ -405,7 +430,12 @@ namespace GraphDB.Core
                 return null;
             }
             //遍历节点列表
-            return Nodes.Where(x => x.Value.Name == nodeName).Select(x => x.Value).First() ;
+            var query = Nodes.Where( x => x.Value.Name == nodeName ).Select( x => x.Value );
+            if (!query.Any())
+            {
+                return null;
+            }
+            return query.First();
         }
 
         //查询函数，返回节点列表中指定类型的节点
@@ -463,7 +493,12 @@ namespace GraphDB.Core
         //查询函数，返回两点之间指定Type的连边
         public IEdge GetEdgeByType(string startName, string endName, string attribute)
         {
-            return GetEdgesByName(startName, endName).First(x => x.Attribute == attribute);
+            var query = GetEdgesByName( startName, endName );
+            if( !query.Any() )
+            {
+                return null;
+            }
+            return query.First(x => x.Attribute == attribute);
         }
     }
 }
