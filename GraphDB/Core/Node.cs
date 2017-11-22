@@ -43,8 +43,8 @@ namespace GraphDB.Core
 
         public Node(INode oriNode )
         {
-            myGuid = oriNode != null ? oriNode.Guid : System.Guid.NewGuid().ToString();
-            myName = oriNode != null ? oriNode.Name : "";
+            myGuid = oriNode.Guid;
+            myName = oriNode.Name;
             myOutLink = new List<IEdge>();
             myInLink = new List<IEdge>();
         }
@@ -198,7 +198,7 @@ namespace GraphDB.Core
         {
             string strResult = "";
 
-            strResult +="Name:" + Name + "\n";
+            strResult +="Name:" + Name;
             
             return strResult;
         }

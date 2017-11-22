@@ -8,6 +8,7 @@ using GraphDB.Constructor.Semantic;
 using GraphDB.Contract.Core;
 using GraphDB.Contract.Enum;
 using GraphDB.Core;
+using GraphDB.Tool;
 
 namespace GraphDB.App
 {
@@ -21,7 +22,8 @@ namespace GraphDB.App
         public MainWindow()
         {
             InitializeComponent();
-            DataInit();
+            //DataInit();
+            
         }
 
         private void DataInit()
@@ -43,6 +45,12 @@ namespace GraphDB.App
             }
             //创建网络
             return content;
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            ConfigWindow winConfig = new ConfigWindow("Semantic.xml");
+            winConfig.ShowDialog();
         }
     }
 }

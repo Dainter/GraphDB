@@ -29,7 +29,8 @@ namespace GraphDB.Constructor.Semantic
                 var chars = SplitChar( curItem );
                 BuildNetwork(chars);
             }
-            mySemanticGraph.SaveDataBase();
+            ErrorCode err;
+            mySemanticGraph.SaveDataBase(out err);
             return;
         }
 

@@ -26,5 +26,7 @@ namespace GraphDB.Contract.Core
         IEnumerable<IEdge> GetEdgesByGuid( string nodeGuid, EdgeDirection direction );
         //查找类型为指定Type的连边
         IEnumerable<IEdge> GetEdgesByType( string edgeType, EdgeDirection direction );
+        //节点摘要信息输出
+        string DataOutput();
     }
 }

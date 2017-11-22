@@ -26,19 +26,6 @@ namespace GraphDB.Core
         {
             myNodeList = new Dictionary<string, INode>();
             myEdgeList = new List<IEdge>();
-            myIohandler = new XMLStrategy("db.xml");
-
-            //INode nodeA = new Node(Guid.NewGuid().ToString(), "NodeA");
-            //myNodeList.Add(nodeA.Guid, nodeA);
-            //INode nodeB = new Node(Guid.NewGuid().ToString(), "NodeB");
-            //myNodeList.Add(nodeB.Guid, nodeB);
-            //IEdge edgeA = new Edge("LinkA");
-            //edgeA.From = nodeA;
-            //edgeA.To = nodeB;
-            //nodeA.AddEdge(edgeA);
-            //nodeB.RegisterInbound(edgeA);
-            //myEdgeList.Add(edgeA);
-            //SaveDataBase();
         }
 
         public Graph( string path )
@@ -49,7 +36,8 @@ namespace GraphDB.Core
 
             if( !File.Exists( path ) )
             {
-                SaveDataBase();
+                ErrorCode err;
+                SaveDataBase(out err);
                 return;
             }
             GraphInit();
@@ -89,15 +77,17 @@ namespace GraphDB.Core
             }
         }
 
-        public void SaveDataBase()
+        public void SaveDataBase(out ErrorCode err)
         {
-            ErrorCode err;
             XmlDocument doc = ToXML();
             myIohandler.SaveFile(doc, out err);
-            if (err != ErrorCode.NoError)
-            {
-                throw new Exception($"Error found during save DB file. Error Code:{err}");
-            }
+        }
+
+        public void SaveAsDataBase(string newPath, out ErrorCode err )
+        {
+            IIoStrategy newIohandler = new XMLStrategy(newPath);
+            XmlDocument doc = ToXML();
+            newIohandler.SaveFile(doc, out err);
         }
 
         //将数据保存为XML文件（接口）
@@ -330,6 +320,30 @@ namespace GraphDB.Core
             err = ErrorCode.NoError;
         }
 
+        //加入连边（接口）
+        public void AddEdge(INode startNode, INode endNode, IEdge newEdge, out ErrorCode err)
+        {
+            if (startNode == null || endNode == null || newEdge == null)
+            {
+                err = ErrorCode.InvalidParameter;
+                return;
+            }
+            if( !ContainsNode( startNode ) || !ContainsNode(endNode))
+            {
+                err = ErrorCode.NodeNotExists;
+                return;
+            }
+            AddEdge(startNode, endNode, newEdge);
+            err = ErrorCode.NoError;
+        }
+
+        //加入连边（接口）
+        public void AddEdgeByGuid(string startGuid, string endGuid, IEdge newEdge, out ErrorCode err)
+        {
+            AddEdge( startGuid, endGuid, newEdge );
+            err = ErrorCode.NoError;
+        }
+
         //检查节点是否已存在
         public bool ContainsNode(string nodeName)
         {
@@ -458,6 +472,21 @@ namespace GraphDB.Core
             }
             //遍历节点列表
             return Nodes.Where( x => x.Value.Name == nodeName && x.Value.GetType() == type ).Select( x => x.Value );
+        }
+
+        //查询函数，返回节点中某个GUID的索引位置
+        public int IndexOf(string guid)
+        {
+            int index = 0;
+            foreach( var curItem in Nodes )
+            {
+                if( curItem.Key == guid )
+                {
+                    return index;
+                }
+                index++;
+            }
+            return -1;
         }
 
         //查询函数，返回指定GUID的节点间的连边
