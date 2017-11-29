@@ -198,8 +198,9 @@ namespace GraphDB.Core
         {
             string strResult = "";
 
-            strResult +="Name:" + Name;
-            
+            strResult +="Name: " + Name;
+            strResult += "\nType: " + GetType().Name;
+
             return strResult;
         }
 

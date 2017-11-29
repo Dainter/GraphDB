@@ -525,6 +525,7 @@ namespace GraphDB.Tool
             }
             return "";
         }
+        
         //构造新的ToolTip
         private ToolTip BuildNewTip(string guid)
         {
@@ -534,6 +535,7 @@ namespace GraphDB.Tool
 
             return nodeTip;
         }
+        
         //显示节点细节信息
         private void LoadNodeInfo(INode curNode)
         {
@@ -571,6 +573,7 @@ namespace GraphDB.Tool
             }
         }
 
+        //生成控件
         private Control GetWidget(PropertyInfo pInfo, object curNode)
         {
             

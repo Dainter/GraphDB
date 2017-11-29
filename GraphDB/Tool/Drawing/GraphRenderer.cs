@@ -15,12 +15,12 @@ namespace GraphDB.Tool.Drawing
 {
     public class GraphRenderer
     {
-        private Brush myDrawingBrush = Brushes.AliceBlue;
-        private Pen myDrawingPen = new Pen(Brushes.SteelBlue, 3);
-        private Brush myTextBrush = Brushes.Black;
-        private readonly Pen myTextPen = new Pen(Brushes.White, 1);
-        private readonly Dictionary<string, Visual> myVisuals = new Dictionary<string, Visual>();
-        private int myRadius = 30;
+        private Brush myDrawingBrush;
+        private Pen myDrawingPen;
+        private Brush myTextBrush;
+        private readonly Pen myTextPen;
+        private readonly Dictionary<string, Visual> myVisuals;
+        private int myRadius;
 
         private DrawingCanvas myDrawingCanvas;
         private Graph mySubGraph;
@@ -28,12 +28,26 @@ namespace GraphDB.Tool.Drawing
 
         public Dictionary<string, Visual> Visuals => myVisuals;
 
+        public GraphRenderer()
+        {
+            myDrawingBrush = Brushes.AliceBlue;
+            myDrawingPen = new Pen(Brushes.SteelBlue, 3);
+            myTextBrush = Brushes.Black;
+            myTextPen = new Pen(Brushes.White, 1);
+            myVisuals = new Dictionary<string, Visual>();
+            myRadius = 30;
+        }
 
         public void DrawNewGraph(DrawingCanvas dc, int neibour, Graph newSubGraph )
         {
             myDrawingCanvas = dc;
             mySubGraph = newSubGraph;
-            DataInit(neibour);
+            myCirco = new CircleLayout(neibour, myRadius);
+            //初始化所有布局点
+            myCirco.LayoutInit(mySubGraph);
+            //进入退火循环
+            myCirco.Float(mySubGraph);
+            //绘制网络图
             DrawGraph();
         }
 
@@ -64,16 +78,6 @@ namespace GraphDB.Tool.Drawing
                 myVisuals.Add(node.Guid, visual);
                 myDrawingCanvas.AddVisual(visual);
             }
-        }
-
-        private void DataInit(int neibour)
-        {
-            
-            myCirco = new CircleLayout(neibour, myRadius);
-            //初始化所有布局点
-            myCirco.LayoutInit(mySubGraph);
-            //进入退火循环
-            myCirco.Float(mySubGraph);
         }
 
         //切换并读取样式
@@ -173,6 +177,7 @@ namespace GraphDB.Tool.Drawing
                 dc.DrawText(text, new Point(center.X - width * 1.0 / 2, center.Y - height * 1.0 / 2));
             }
         }
+        
         // 绘制连边文本
         private void DrawText(DrawingVisual visual, string attribute, Point start, Point end)
         {
@@ -191,6 +196,7 @@ namespace GraphDB.Tool.Drawing
                 dc.DrawText(text, new Point(center.X - width * 1.0 / 2, center.Y - height * 1.0 / 2));
             }
         }
+        
         //绘制连边形状
         private Arrow DrawLeaderLineArrow(Point startPt, Point endPt)
         {
