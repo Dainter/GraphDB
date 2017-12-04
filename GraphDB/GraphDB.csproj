@@ -159,6 +159,14 @@
     <Resource Include="Tool\images\AddEdge.png" />
     <Resource Include="Tool\images\AddEdge_small.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Tool\images\Modify.png" />
+    <Resource Include="Tool\images\Modify_small.png" />
+    <Resource Include="Tool\images\RemoveEdge.png" />
+    <Resource Include="Tool\images\RemoveEdge_small.png" />
+    <Resource Include="Tool\images\RemoveNode.png" />
+    <Resource Include="Tool\images\RemoveNode_small.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

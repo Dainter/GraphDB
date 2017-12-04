@@ -13,26 +13,9 @@
     <RoutedUICommand x:Key="ClearResultCommand" Text="ClearResult" />
     <RoutedUICommand x:Key="RefreshCommand" Text="RefreshCommand" />
 
-    <RoutedUICommand x:Key="AddNodeCommand" Text="AddNode" />
-    <RoutedUICommand x:Key="AddPropertyCommand" Text="AddProperty" />
-    <RoutedUICommand x:Key="RemovePropertyCommand" Text="RemoveProperty" />
     <RoutedUICommand x:Key="AddEdgeCommand" Text="AddEdge" />
     <RoutedUICommand x:Key="ModifyNodeCommand" Text="ModifyNode" />
     <RoutedUICommand x:Key="ModifyEdgeCommand" Text="ModifyEdge" />
     <RoutedUICommand x:Key="RemoveNodeCommand" Text="RemoveNode" />
     <RoutedUICommand x:Key="RemoveEdgeCommand" Text="RemoveEdge" />
-
-    <RoutedUICommand x:Key="NewTaskCommand" Text="NewTaskCommand" />
-    <RoutedUICommand x:Key="EditTaskCommand" Text="EditTaskCommand" />
-    <RoutedUICommand x:Key="ShowTaskDetailCommand" Text="ShowTaskDetailCommand" />
-
-    <RoutedUICommand x:Key="EditUserCommand" Text="EditUserCommand" />
-    <RoutedUICommand x:Key="EditGroupCommand" Text="EditGroupCommand" />
-
-    <RoutedUICommand x:Key="EditQlevelCommand" Text="QlevelCommand" />
-    <RoutedUICommand x:Key="EditTypeCommand" Text="TypeCommand" />
-    <RoutedUICommand x:Key="EditProcedureCommand" Text="ProcedureCommand" />
-
-    <RoutedUICommand x:Key="RunDispatcherCommand" Text="RunDispatcherCommand" />
-    <RoutedUICommand x:Key="PauseDispatcherCommand" Text="PauseDispatcherCommand" />
 </ResourceDictionary>

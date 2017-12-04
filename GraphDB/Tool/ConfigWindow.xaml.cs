@@ -98,12 +98,17 @@ namespace GraphDB.Tool
             NodeListBox.Items.Clear();
             ClearArrows(DrawingSurface);
             DrawingSurface.ClearVisuals();
-            //Todo
-            //ModifyEndName.Items.Clear();
-            //ModifyEndType.Items.Clear();
-            //RemoveEndName.Items.Clear();
-            //RemoveEndType.Items.Clear();
+
+            ResetRibbonControls();
         }
+
+        private void ResetRibbonControls()
+        {
+            EndNodeName.ItemsSource = null;
+            EdgeAttributeBox.ItemsSource = null;
+            EdgeValueBox.Text = "";
+        }
+
         //节点更新
         private void GraphNodeUpdate()
         {
@@ -114,11 +119,8 @@ namespace GraphDB.Tool
             NodeListBox.Items.Clear();
             ClearArrows(DrawingSurface);
             DrawingSurface.ClearVisuals();
-            //Todo
-            //ModifyEndName.Items.Clear();
-            //ModifyEndType.Items.Clear();
-            //RemoveEndName.Items.Clear();
-            //RemoveEndType.Items.Clear();
+
+            ResetRibbonControls();
             FillNodeList();
         }
         //连边更新
@@ -128,7 +130,7 @@ namespace GraphDB.Tool
             ClearArrows(DrawingSurface);
             DrawingSurface.ClearVisuals();
             SelectNodes(myIntNodeIndex);
-            FindCustomNode(myCurNodeName, myCurNodeType);
+            FindCustomNode(myCurNodeName);
         }
 
         #region StatusTimer
@@ -718,12 +720,11 @@ namespace GraphDB.Tool
             var curStyle = (Style)TryFindResource(style);
             myGraphRenderer.ChangeStyle( curStyle );
         }
-
         #endregion
 
-        #region DATA
+        #region Ribbon Linkage
         string myCurNodeName = "";
-        string myCurNodeType = "";
+
         //设置当前选中节点信息
         void SetCurrentNodeInfo(int index)
         {
@@ -736,393 +737,93 @@ namespace GraphDB.Tool
             {
                 myCurSelectNode = new NodeInfo(myGdb.Nodes.ElementAt(myIntNodeIndex).Value);
             }
+            ResetRibbonControls();
             StatusNameBox.Text = myCurSelectNode.Name;
-            StatusTypeBox.Text = myCurSelectNode.Type;
-            UpdateProperties();
         }
-        //更新属性列表
-        void UpdateProperties()
-        {
-            //Todo
-            //ModifyPropertyComboBox.Items.Clear();
-            //ModifyPropertyTextBox.Text = "";
-            
-        }
-        //更新属性值
-        private void ModifyPropertyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            //Todo
-            //if (myIntNodeIndex < 0 || ModifyPropertyComboBox.SelectedIndex <0)
-            //{
-            //    return;
-            //}
-            //foreach (NodeProperty np in curSelectNode.Properties)
-            //{
-            //    if (np.Key == ModifyPropertyComboBox.SelectedItem.ToString())
-            //    {
-            //        ModifyPropertyTextBox.Text = np.Value;
-            //    }
-            //}
-        }
+
         //名称文本框值改变
-        private void NameTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void StatusNameBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             myCurNodeName = ((TextBox)sender).Text;
-            if (myCurSelectNode == null )
-            {
-                return;
-            }
-            FindCustomNode(myCurNodeName, myCurNodeType);
-        }
-        //类型文本框值改变
-        private void TypeTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            myCurNodeType = ((TextBox)sender).Text;
             if (myCurSelectNode == null)
             {
                 return;
             }
-            FindCustomNode(myCurNodeName, myCurNodeType);
+            FindCustomNode(myCurNodeName);
         }
+
         //查找用户指定节点
-        private void FindCustomNode(string sName, string sType)
+        private void FindCustomNode(string sName)
         {
-            //tODO
-            //if (myGdb == null)
-            //{
-            //    return;
-            //}
+            if (myGdb == null)
+            {
+                return;
+            }
+            if (!myGdb.ContainsNode(sName))
+            {
+                return;
+            }
+            myCurModifyNode = myGdb.GetNodeByName(sName);
+            NodeListBox.SelectedIndex = myGdb.IndexOf( myCurModifyNode );
             
-            //int index = myGdb.GetIndexByNameAndType(sName, sType);
-            //if (index < 0)
-            //{
-            //    return;
-            //}
-            //NodeListBox.SelectedIndex = index;
-            //myCurModifyNode = myGdb.GetNodeByName(sName, sType);
-            //ModifyEndName.Items.Clear();
-            //RemoveEndName.Items.Clear();
-            //foreach (IEdge edge in myCurModifyNode.OutBound)
-            //{
-            //    if (ModifyEndName.Items.IndexOf(edge.End.Name) > 0)
-            //    {
-            //        continue;
-            //    }
-            //    ModifyEndName.Items.Add(edge.End.Name);
-            //    RemoveEndName.Items.Add(edge.End.Name);
-            //}
-            //ModifyEndName.SelectedIndex = 0;
-            //FillModifyEndType((string)ModifyEndName.SelectedItem);
-            //RemoveEndName.SelectedIndex = 0;
-            //FillRemoveEndType((string)RemoveEndName.SelectedItem);
-            //FindCustomEdge();
-            //return;
-        }
-        //修改节点名称改变
-        private void ModifyNameComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (((ComboBox)sender).Text == "")
+            EndNodeName.ItemsSource = myCurModifyNode.OutBound.Select( x => x.To.Name ).Distinct();
+            if( EndNodeName.ItemsSource == null || EndNodeName.Items.Count <= 0 )
             {
                 return;
             }
+            EndNodeName.SelectedIndex = 0;
+        }
+
+        //目标节点名称选项改变
+        private void EndNodeNameComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
             if (e.AddedItems.Count <= 0)
             {
                 return;
             }
-            FillModifyEndType(e.AddedItems[0].ToString());
+            FillAttributeList(e.AddedItems[0].ToString());
         }
-        //填充修改类型列表内容
-        private void FillModifyEndType(string sName)
+
+        //填充特性列表内容
+        private void FillAttributeList(string endName)
         {
-            //Todo
-            //ModifyEndType.Items.Clear();
-            //if (myCurModifyNode == null)
-            //{
-            //    return;
-            //}
-            //foreach (IEdge edge in myCurModifyNode.OutBound)
-            //{
-            //    if (ModifyEndType.Items.IndexOf(edge.To.Name) > 0)
-            //    {
-            //        continue;
-            //    }
-            //    if (sName != edge.To.Name)
-            //    {
-            //        continue;
-            //    }
-            //    ModifyEndType.Items.Add(edge.To.Type);
-            //}
-            //ModifyEndType.SelectedIndex = 0;
-        }
-        //修改节点类型改变
-        private void ModifyTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (((ComboBox)sender).Text == "")
+            EdgeAttributeBox.ItemsSource = null;
+            if (myCurModifyNode == null)
             {
                 return;
             }
-            FindCustomEdge();
+            EdgeAttributeBox.ItemsSource = myCurModifyNode.GetEdgesByName( endName, EdgeDirection.Out ).Select(x => x.Attribute).Distinct();
         }
+
+        //连边列表特性选项改变
+        private void EdgeAttributeBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count <= 0)
+            {
+                return;
+            }
+            FindCustomEdge(e.AddedItems[0].ToString());
+        }
+
         //查找目标连边
-        private void FindCustomEdge()
+        private void FindCustomEdge(string attribute)
         {
-            //Todo
-            //if (myGdb == null)
-            //{
-            //    return;
-            //}
-            //ModifyStartName.Text = StatusNameBox.Text;
-            //ModifyStartType.Text = StatusTypeBox.Text;
-            //if (ModifyStartName.Text == ""
-            //    || ModifyStartType.Text == ""
-            //    || ModifyEndName.Text == ""
-            //    || ModifyEndType.Text == "")
-            //{
-            //    return;
-            //}
-            //myCurModifyEdge = myGdb.GetEdgeByNameAndType(ModifyStartName.Text, ModifyStartType.Text, ModifyEndName.Text, ModifyEndType.Text);
-            //if (myCurModifyEdge == null)
-            //{
-            //    return;
-            //}
-            //EdgeKeyBox.Text = myCurModifyEdge.Type;
-            //EdgeValueBox.Text = myCurModifyEdge.Value;
-        }
-        //删除节点名称改变
-        private void RemoveNameComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (((ComboBox)sender).Text == "")
+            if (myCurModifyNode == null)
             {
                 return;
             }
-            if (e.AddedItems.Count <= 0)
+            string endName = EndNodeName.Text;
+            var edges = myCurModifyNode.GetEdgesByName( endName, EdgeDirection.Out ).Where( x => x.Attribute == attribute );
+            if( !edges.Any() )
             {
                 return;
             }
-            FillRemoveEndType(e.AddedItems[0].ToString());
+            myCurModifyEdge = edges.First();
+            EdgeValueBox.Text = myCurModifyEdge.Value;
         }
-        //填充删除节点两类型列表
-        private void FillRemoveEndType(string sName)
-        {
-            //Todo
-            //RemoveEndType.Items.Clear();
-            //if (myCurModifyNode == null)
-            //{
-            //    return;
-            //}
-            //foreach (IEdge edge in myCurModifyNode.OutBound)
-            //{
-            //    if (RemoveEndType.Items.IndexOf(edge.End.Name) > 0)
-            //    {
-            //        continue;
-            //    }
-            //    if (sName != edge.End.Name)
-            //    {
-            //        continue;
-            //    }
-            //    RemoveEndType.Items.Add(edge.End.Type);
-            //}
-            //RemoveEndType.SelectedIndex = 0;
-        }
-        //加入节点命令执行函数
-        private void AddNodeCommand_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            //Todo
-            //string strName, strType, strProperty;
-            //ErrorCode err = ErrorCode.NoError;
-            //if (IsContentLegal(out strName,out strType,out strProperty) == false)
-            //{
-            //    ShowStatus("Name and Type are necessary.");
-            //    return;
-            //}
-            ////gdb.AddNodeData(strName, strType, ref err, strProperty);
-            //if (err != ErrorCode.NoError)
-            //{
-            //    switch (err)
-            //    {
-            //        case ErrorCode.NodeExists:
-            //            ShowStatus("Add INode failed, INode already exists.");
-            //            break;
-            //        case ErrorCode.CreateNodeFailed:
-            //            ShowStatus("Create INode failed.");
-            //            break;
-            //        default:
-            //            ShowStatus("Add INode failed, error code:" + err.ToString());
-            //            break;
-            //    }
-            //    return;
-            //}
-            //AddNodeProperties.Items.Clear();
-            //AddNodeKey.SelectedIndex = 0;
-            //AddNodeValue.Text = "";
-            //FillNodeList();
-            ShowStatus("Add INode Success.");
-            return;
-        }
-        //校验节点创建入参
-        //private bool IsContentLegal(out string sName, out string sType, out string sProperty)
-        //{
-            //Todo
-            //string strName = null, strType = null, strProperty = "";
+        #endregion
 
-            //foreach (string strItem in AddNodeProperties.Items)
-            //{
-            //    switch (GetKeyFromItem(strItem))
-            //    {
-            //        case "Name":
-            //            strName = GetValueFromItem(strItem);
-            //            break;
-            //        case "Type":
-            //            strType = GetValueFromItem(strItem);
-            //            break;
-            //        default:
-            //            strProperty += strItem + ",";
-            //            break;
-            //    }
-            //}
-            //if (strName == null || strType == null)
-            //{
-            //    sName = "";
-            //    sType = "";
-            //    sProperty = "";
-            //    return false;
-            //}
-            //sName = strName;
-            //sType = strType;
-            //sProperty = strProperty;
-            //return true;
-        //}
-        //加入属性命令执行函数
-        private void AddPropertyCommand_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            //Todo
-            //string strKey, strValue;
-
-            //strKey = AddNodeKey.Text;
-            //strValue = AddNodeValue.Text;
-            //if (strKey == "" || strValue == "")
-            //{
-            //    ShowStatus("Key or Value can't be empty.");
-            //    return;
-            //}
-            ////将键值对校验后加入列表
-            //AddPropertyIntoList(strKey ,strValue);
-            //SortList();
-            //AddNodeKey.Text = "";
-            //AddNodeValue.Text = "";
-        }
-        //在属性列表中加入新属性
-        private void AddPropertyIntoList(string sKey, string sValue)
-        {
-            //Todo
-            //int index = 0;
-            //string strTar = null;
-
-            //foreach (string strItem in AddNodeProperties.Items)
-            //{
-            //    if (GetKeyFromItem(strItem) == sKey)
-            //    {
-            //        strTar= strItem;
-            //        break;
-            //    }
-            //    index++;
-            //}
-            //if (strTar != null)
-            //{
-            //    AddNodeProperties.Items.Insert(index, sKey + ":" + sValue);
-            //    AddNodeProperties.Items.Remove(strTar);
-            //}
-            //else
-            //{
-            //    AddNodeProperties.Items.Add(sKey + ":" + sValue);
-            //}
-        }
-        //获取当前列表项中的key字段
-        private string GetKeyFromItem(string sItem)
-        {
-            int index = sItem.IndexOf(':');
-            string strResult;
-
-            if (index < 0)
-            {
-                return sItem;
-            }
-            strResult = sItem.Substring(0, index);
-            return strResult;
-        }
-        //获取当前列表项中的Value字段
-        private string GetValueFromItem(string sItem)
-        {
-            //Todo
-            int index = sItem.IndexOf(':');
-            string strResult;
-
-            if (index < 0)
-            {
-                return "";
-            }
-            strResult = sItem.Substring(index+1);
-            return strResult;
-        }
-        //对当前属性列表进行排序
-        private void SortList()
-        {
-            //Todo
-            //string strName = null, strType = null;
-            //int index = -1;
-
-            //foreach (string strItem in AddNodeProperties.Items)
-            //{
-            //    if (GetKeyFromItem(strItem) == "Name")
-            //    {
-            //        strName = strItem;
-            //        index++;
-            //        break;
-            //    }
-            //}
-            //if (strName != null)
-            //{
-            //    AddNodeProperties.Items.Remove(strName);
-            //    AddNodeProperties.Items.Insert(index, strName);
-            //}
-            //foreach (string strItem in AddNodeProperties.Items)
-            //{
-            //    if (GetKeyFromItem(strItem) == "Type")
-            //    {
-            //        strType = strItem;
-            //        index++;
-            //        break;
-            //    }
-            //}
-            //if (strType != null)
-            //{
-            //    AddNodeProperties.Items.Remove(strType);
-            //    AddNodeProperties.Items.Insert(index, strType);
-            //}
-        }
-        //属性列表选择项改变响应函数
-        private void AddNodeProperties_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            //Todo
-            //string strItem;
-            //if (AddNodeProperties.SelectedIndex < 0)
-            //{
-            //    return;
-            //}
-            //strItem = AddNodeProperties.SelectedItem.ToString();
-            //AddNodeKey.Text = GetKeyFromItem(strItem);
-            //AddNodeValue.Text = GetValueFromItem(strItem);
-        }
-        //移除属性命令执行函数
-        private void RemovePropertyCommand_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            //Todo
-            //if (AddNodeProperties.SelectedIndex < 0)
-            //{
-            //    return;
-            //}
-            //AddNodeProperties.Items.RemoveAt(AddNodeProperties.SelectedIndex);
-        }
+        #region Graph Operation
         //加入连边命令执行函数
         private void AddEdgeCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
@@ -1146,7 +847,7 @@ namespace GraphDB.Tool
             //strEndType = AddEndType.Text;
             //strEdgeKey = AddEdgeKey.Text;
             //strEdgeValue = AddEdgeValue.Text;
-            
+
             //myGdb.AddEdgeData(strStartName, strStartType, strEndName, strEndType, strEdgeKey, ref err, strEdgeValue);
             //if (err != ErrorCode.NoError)
             //{
@@ -1175,59 +876,7 @@ namespace GraphDB.Tool
             //ShowStatus("Add IEdge Success.");
             //return;
         }
-        //修改节点命令执行函数
-        private void ModifyNodeCommand_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            //Todo
-            //获取值
-            //string strKey, strValue;
-            ////NodeProperty npDel = null;
 
-            //strKey = ModifyPropertyComboBox.Text;
-            //strValue = ModifyPropertyTextBox.Text;
-            //if (strKey == "")
-            //{
-            //    ShowStatus("Modify Property Failed, Key field can't be empty.");
-            //    return;
-            //}
-            //if (myCurModifyNode == null)
-            //{
-            //    ShowStatus("Modify Property Failed, no INode be selected.");
-            //    return;
-            //}
-            ////如果存在该key则修改
-            //foreach (NodeProperty np in curModifyNode.Properties)
-            //{
-            //    if (strKey != np.Key)
-            //    {
-            //        continue;
-            //    }
-            //    if (strValue == "")
-            //    {
-            //        npDel = np;
-            //        break;
-            //    }
-            //    np.Value = strValue;
-            //    ShowStatus("Modify Property Success.");
-            //    return;
-            //}
-            //如果value为空则删除该属性
-            //if (npDel != null)
-            //{
-            //    curModifyNode.Properties.Remove(npDel);
-            //    ShowStatus("Delete Property Success.");
-            //    return;
-            //}
-            //if (strValue == "")
-            //{
-            //    ShowStatus("Add Property Failed, Value field can't be empty.");
-            //    return;
-            //}
-            ////如果不存在则插入新属性
-            ////curModifyNode.Properties.Add(new NodeProperty(strKey, strValue));
-            //ShowStatus("Add Property Success.");
-            //return;
-        }
         //修改连边命令执行函数
         private void ModifyEdgeCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
@@ -1251,6 +900,7 @@ namespace GraphDB.Tool
             ShowStatus("Modify IEdge Success.");
             return;
         }
+        
         //移除节点命令执行函数
         private void RemoveNodeCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
@@ -1275,6 +925,7 @@ namespace GraphDB.Tool
             //GraphNodeUpdate();
             //return;
         }
+        
         //移除连边命令执行函数
         private void RemoveEdgeCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
@@ -1316,34 +967,7 @@ namespace GraphDB.Tool
             return;
         }
 
-        private void AddNodeCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = myIsDbAvailable;
-        }
-
-        private void AddPropertyCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = myIsDbAvailable;
-        }
-
-        private void RemovePropertyCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            //Todo
-            //if (AddNodeProperties.SelectedIndex < 0)
-            //{
-            //    e.CanExecute = false;
-            //    return;
-            //}
-            //e.CanExecute = true;
-            return;
-        }
-
         private void AddEdgeCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = myIsDbAvailable;
-        }
-
-        private void ModifyNodeCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = myIsDbAvailable;
         }
@@ -1362,12 +986,6 @@ namespace GraphDB.Tool
         {
             e.CanExecute = myIsDbAvailable;
         }
-
-
-
-
         #endregion
-
-        
     }
 }

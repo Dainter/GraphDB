@@ -489,6 +489,21 @@ namespace GraphDB.Core
             return -1;
         }
 
+        //查询函数，返回节点中某个Node的索引位置
+        public int IndexOf(INode node)
+        {
+            int index = 0;
+            foreach (var curItem in Nodes)
+            {
+                if (curItem.Key == node.Guid)
+                {
+                    return index;
+                }
+                index++;
+            }
+            return -1;
+        }
+
         //查询函数，返回指定GUID的节点间的连边
         public IEnumerable<IEdge> GetEdgesByGuid(string startGuid, string endGuid )
         {

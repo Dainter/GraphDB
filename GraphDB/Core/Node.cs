@@ -217,25 +217,43 @@ namespace GraphDB.Core
             }
             if (direction == EdgeDirection.Out)
             {
-                return OutBound.Where(x => x.From.Guid == nodeGuid);
+                return OutBound.Where(x => x.To.Guid == nodeGuid);
             }
             return new List<IEdge>();
         }
 
-        //查找类型为指定Type的连边
-        public IEnumerable<IEdge> GetEdgesByType(string edgeType, EdgeDirection direction)
+        //查找目标为指定Name的连边
+        public IEnumerable<IEdge> GetEdgesByName(string nodeName, EdgeDirection direction)
         {
-            if (edgeType == null)
+            if (nodeName == null)
             {
                 return new List<IEdge>();
             }
             if (direction == EdgeDirection.In)
             {
-                return InBound.Where(x => x.From.Guid == edgeType);
+                return InBound.Where(x => x.From.Name == nodeName);
             }
             if (direction == EdgeDirection.Out)
             {
-                return OutBound.Where(x => x.From.Guid == edgeType);
+                return OutBound.Where(x => x.To.Name == nodeName);
+            }
+            return new List<IEdge>();
+        }
+
+        //查找类型为指定Type的连边
+        public IEnumerable<IEdge> GetEdgesByType(string attribute, EdgeDirection direction)
+        {
+            if (attribute == null)
+            {
+                return new List<IEdge>();
+            }
+            if (direction == EdgeDirection.In)
+            {
+                return InBound.Where(x => x.Attribute == attribute);
+            }
+            if (direction == EdgeDirection.Out)
+            {
+                return OutBound.Where(x => x.Attribute == attribute);
             }
             return new List<IEdge>();
         }
