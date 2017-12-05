@@ -233,13 +233,15 @@
         </Border>
         <GridSplitter HorizontalAlignment="Center" Grid.Column="3" Grid.Row="1" Width="3"></GridSplitter>
         <Border Grid.Column="4" Grid.Row="1" Margin="3" BorderBrush="SteelBlue" BorderThickness="1">
-            <Grid x:Name="NodeInfoGrid" Background="{Binding ElementName=MainRibbon, Path=Background}" MinWidth="200" >
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" MinWidth="50"/>
-                    <ColumnDefinition Width="Auto" MinWidth="100"/>
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-            </Grid>
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <Grid x:Name="NodeInfoGrid" Background="{Binding ElementName=MainRibbon, Path=Background}" MinWidth="200" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="50"/>
+                        <ColumnDefinition Width="Auto" MinWidth="100"/>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                </Grid>
+            </ScrollViewer>
         </Border>
     </Grid>
     <!--<r:RibbonWindow.TaskbarItemInfo>

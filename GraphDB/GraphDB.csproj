@@ -66,7 +66,6 @@
     <Compile Include="Tool\Layout\CircleLayout.cs" />
     <Compile Include="Tool\Layout\EdgeDrawing.cs" />
     <Compile Include="Tool\Layout\NodeDrawing.cs" />
-    <Compile Include="Tool\NodeInfo.cs" />
     <Compile Include="Tool\UI_Resources\SystemConverter.cs" />
     <Compile Include="Utility\SerializableHelper.cs" />
     <Compile Include="Core\Edge.cs" />

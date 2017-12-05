@@ -447,7 +447,7 @@ namespace GraphDB.Tool
         private void BuildSubGraph(INode curSelNode)
         {
             ErrorCode err;
-            LoadNodeInfo(curSelNode);
+            
             var drawNodes = new List<INode>();
             var neibourNodes = new List<INode>();
             drawNodes.Add(curSelNode);
@@ -556,7 +556,18 @@ namespace GraphDB.Tool
                 dynamic x = pInfo.GetValue(curNode, null);
                 foreach (var item in x)
                 {
-                    contentlistBox.Items.Add(item);
+                    if( pInfo.Name == "OutBound" )
+                    {
+                        contentlistBox.Items.Add(((IEdge)item).To.Name);
+                    }
+                    else if(pInfo.Name == "InBound")
+                    {
+                        contentlistBox.Items.Add(((IEdge)item).From.Name);
+                    }
+                    else
+                    {
+                        contentlistBox.Items.Add(item.ToString());
+                    }
                 }
                 return contentlistBox;
             }
@@ -711,9 +722,11 @@ namespace GraphDB.Tool
             UpdateEndNodeComboBox();
             //绑定Ribbon文本框
             StatusNameBox.Text = newNode.Name;
+            LoadNodeInfo(myCurModifyNode);
             BuildSubGraph(myCurModifyNode);
             ClearArrows(DrawingSurface);
-            myGraphRenderer.DrawNewGraph(DrawingSurface, myCurModifyNode.OutBound.Count, mySubGraph);
+            int neibour = myCurModifyNode.OutBound.Select( x => x.To.Name ).Distinct().Count();
+            myGraphRenderer.DrawNewGraph(DrawingSurface, neibour, mySubGraph);
         }
 
         //名称文本框值改变
