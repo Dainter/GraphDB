@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -15,7 +12,6 @@ using GraphDB.Contract.Core;
 using GraphDB.Contract.Enum;
 using GraphDB.Core;
 using GraphDB.Tool.Drawing;
-using GraphDB.Tool.Layout;
 
 using Microsoft.Win32;
 using Microsoft.Windows.Controls.Ribbon;
@@ -42,14 +38,11 @@ namespace GraphDB.Tool
         //MainDataSet DataSet;
         private readonly string myDataBasePath;
 
-        bool myIsDbAvailable = false;
-        bool myIsModified = false;
+        bool myIsDbAvailable;
+        bool myIsModified;
         DispatcherTimer myStatusUpadteTimer;
-        int myIntNodeIndex = -1;
-        int myIntPointNodeIndex = -1;
         INode myCurModifyNode;
         IEdge myCurModifyEdge;
-        NodeInfo myCurSelectNode;
         
         public ConfigWindow(string dbPath)
         {
@@ -89,12 +82,7 @@ namespace GraphDB.Tool
         private void AllReset()
         {
             myGdb = null;
-            myCurModifyNode = null;
-            myCurModifyEdge = null;
             myIsDbAvailable = false;
-            myIntNodeIndex = -1;
-            myIntPointNodeIndex = -1;
-            SetCurrentNodeInfo(-1);
             NodeListBox.Items.Clear();
             ClearArrows(DrawingSurface);
             DrawingSurface.ClearVisuals();
@@ -104,6 +92,9 @@ namespace GraphDB.Tool
 
         private void ResetRibbonControls()
         {
+            myCurModifyNode = null;
+            myCurModifyEdge = null;
+
             EndNodeName.ItemsSource = null;
             EdgeAttributeBox.ItemsSource = null;
             EdgeValueBox.Text = "";
@@ -112,10 +103,6 @@ namespace GraphDB.Tool
         //节点更新
         private void GraphNodeUpdate()
         {
-            myCurModifyNode = null;
-            myCurModifyEdge = null;
-            myIntNodeIndex = -1;
-            SetCurrentNodeInfo(-1);
             NodeListBox.Items.Clear();
             ClearArrows(DrawingSurface);
             DrawingSurface.ClearVisuals();
@@ -129,8 +116,8 @@ namespace GraphDB.Tool
             myCurModifyEdge = null;
             ClearArrows(DrawingSurface);
             DrawingSurface.ClearVisuals();
-            SelectNodes(myIntNodeIndex);
-            FindCustomNode(myCurNodeName);
+            SelectNode(NodeListBox.SelectedIndex);
+            UpdateCustomNode(myCurModifyNode.Name);
         }
 
         #region StatusTimer
@@ -457,24 +444,6 @@ namespace GraphDB.Tool
         private Graph mySubGraph;
         private bool myBolScrolltoCenter;
 
-        //选择节点
-        private void SelectNodes(int index)
-        {
-            if (index < 0)
-            {
-                return;
-            }
-            var curSelNode = myGdb.Nodes.ElementAt(index).Value;
-            if (curSelNode == null)
-            {
-                return;
-            }
-            SetCurrentNodeInfo(index);
-            BuildSubGraph(curSelNode);
-            ClearArrows(DrawingSurface);
-            myGraphRenderer.DrawNewGraph(DrawingSurface, curSelNode.OutBound.Count, mySubGraph);
-        }
-
         private void BuildSubGraph(INode curSelNode)
         {
             ErrorCode err;
@@ -617,7 +586,7 @@ namespace GraphDB.Tool
         //节点列表框选中事件处理函数
         private void NodeListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SelectNodes(NodeListBox.SelectedIndex);
+            SelectNode(NodeListBox.SelectedIndex);
             MainScroll.ScrollToBottom();
             MainScroll.ScrollToRightEnd();
             myBolScrolltoCenter = true;
@@ -638,15 +607,13 @@ namespace GraphDB.Tool
         private void DrawingSurfaceMouseMove(object sender, MouseEventArgs e)
         {
             string visualGuid = GetVisualIndex(DrawingSurface.GetVisual(e.GetPosition(DrawingSurface)));
-
-            //PointLabel.Content = visualGuid;
             if (visualGuid == "")
             {
                 return;
             }
+
             ToolTip nodeTip = BuildNewTip(visualGuid);
-            //Todo
-            //myIntPointNodeIndex = visualindex;
+            PointLabel.Content = nodeTip.Content;
             nodeTip.Placement = System.Windows.Controls.Primitives.PlacementMode.Mouse;
             DrawingSurface.ToolTip = nodeTip;
         }
@@ -690,7 +657,7 @@ namespace GraphDB.Tool
         {
             var newItem = (RibbonGalleryItem)e.NewValue;
             ChangeStyle(newItem.ToolTipTitle);
-            if (myIntNodeIndex == -1)
+            if (NodeListBox.SelectedIndex == -1)
             {
                 return;
             }
@@ -723,51 +690,65 @@ namespace GraphDB.Tool
         #endregion
 
         #region Ribbon Linkage
-        string myCurNodeName = "";
-
-        //设置当前选中节点信息
-        void SetCurrentNodeInfo(int index)
+        //选择节点
+        private void SelectNode(int index)
         {
-            myIntNodeIndex = index;
             if (index < 0)
             {
-                myCurSelectNode = new NodeInfo();
-            }
-            else
-            {
-                myCurSelectNode = new NodeInfo(myGdb.Nodes.ElementAt(myIntNodeIndex).Value);
+                return;
             }
             ResetRibbonControls();
-            StatusNameBox.Text = myCurSelectNode.Name;
+            INode newNode = myGdb.Nodes.ElementAt(index).Value;
+            if (newNode == null)
+            {
+                return;
+            }
+            if (myCurModifyNode != null && newNode.Guid == myCurModifyNode.Guid)
+            {
+                return;
+            }
+            myCurModifyNode = newNode;
+            UpdateEndNodeComboBox();
+            //绑定Ribbon文本框
+            StatusNameBox.Text = newNode.Name;
+            BuildSubGraph(myCurModifyNode);
+            ClearArrows(DrawingSurface);
+            myGraphRenderer.DrawNewGraph(DrawingSurface, myCurModifyNode.OutBound.Count, mySubGraph);
         }
 
         //名称文本框值改变
         private void StatusNameBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            myCurNodeName = ((TextBox)sender).Text;
-            if (myCurSelectNode == null)
+            string newName = ((TextBox)sender).Text;
+            if( !myIsDbAvailable )
             {
                 return;
             }
-            FindCustomNode(myCurNodeName);
+            UpdateCustomNode( newName );
         }
 
         //查找用户指定节点
-        private void FindCustomNode(string sName)
+        private void UpdateCustomNode(string newName)
         {
-            if (myGdb == null)
+            INode newNode = myGdb.GetNodeByName(newName);
+            if (newNode == null)
             {
                 return;
             }
-            if (!myGdb.ContainsNode(sName))
+            if (myCurModifyNode != null && newNode.Guid == myCurModifyNode.Guid)
             {
                 return;
             }
-            myCurModifyNode = myGdb.GetNodeByName(sName);
-            NodeListBox.SelectedIndex = myGdb.IndexOf( myCurModifyNode );
-            
-            EndNodeName.ItemsSource = myCurModifyNode.OutBound.Select( x => x.To.Name ).Distinct();
-            if( EndNodeName.ItemsSource == null || EndNodeName.Items.Count <= 0 )
+            myCurModifyNode = newNode;
+            UpdateEndNodeComboBox();
+            //绑定NodeList
+            NodeListBox.SelectedIndex =  myGdb.IndexOf( newNode.Guid );
+        }
+
+        private void UpdateEndNodeComboBox()
+        {
+            EndNodeName.ItemsSource = myCurModifyNode.OutBound.Select(x => x.To.Name).Distinct();
+            if (EndNodeName.ItemsSource == null || EndNodeName.Items.Count <= 0)
             {
                 return;
             }
@@ -793,6 +774,7 @@ namespace GraphDB.Tool
                 return;
             }
             EdgeAttributeBox.ItemsSource = myCurModifyNode.GetEdgesByName( endName, EdgeDirection.Out ).Select(x => x.Attribute).Distinct();
+            EdgeValueBox.Text = "";
         }
 
         //连边列表特性选项改变
@@ -824,167 +806,221 @@ namespace GraphDB.Tool
         #endregion
 
         #region Graph Operation
+        //移除节点命令执行函数
+        private void RemoveNodeCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            ErrorCode err;
+            myGdb.RemoveNode(RemoveNodeName.Text, out err);
+            if (err != ErrorCode.NoError)
+            {
+                ShowStatus("Remove Node Failed, Error:" + err);
+                return;
+            }
+            ShowStatus("Remove Node Success.");
+            GraphNodeUpdate();
+        }
+
         //加入连边命令执行函数
         private void AddEdgeCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            //Todo
-            //ErrorCode err = ErrorCode.NoError;
-            //string strStartName, strStartType, strEndName, strEndType, strEdgeKey, strEdgeValue;
-
-            //if (AddStartName.Text == "" ||
-            //    AddStartType.Text == "" ||
-            //    AddEndName.Text == "" ||
-            //    AddEndType.Text == "" ||
-            //    AddEdgeKey.Text == "" ||
-            //    AddEdgeValue.Text == "" )
-            //{
-            //    ShowStatus("All fields of IEdge can't be empty.");
-            //    return;
-            //}
-            //strStartName = AddStartName.Text;
-            //strStartType = AddStartType.Text;
-            //strEndName = AddEndName.Text;
-            //strEndType = AddEndType.Text;
-            //strEdgeKey = AddEdgeKey.Text;
-            //strEdgeValue = AddEdgeValue.Text;
-
-            //myGdb.AddEdgeData(strStartName, strStartType, strEndName, strEndType, strEdgeKey, ref err, strEdgeValue);
-            //if (err != ErrorCode.NoError)
-            //{
-            //    switch (err)
-            //    {
-            //        case ErrorCode.NodeNotExists:
-            //            ShowStatus("Add IEdge failed, End INode not exists.");
-            //            break;
-            //        case ErrorCode.EdgeExists:
-            //            ShowStatus("Add IEdge failed, IEdge already exists.");
-            //            break;
-            //        case ErrorCode.CreateEdgeFailed:
-            //            ShowStatus("Create IEdge failed.");
-            //            break;
-            //        default:
-            //            ShowStatus("Add IEdge failed, error code:" + err.ToString());
-            //            break;
-            //    }
-            //    return;
-            //}
-            //GraphEdgeUpdate();
-            //AddEndName.Text = "";
-            //AddEndType.Text = "";
-            //AddEdgeKey.Text = "";
-            //AddEdgeValue.Text = "";
-            //ShowStatus("Add IEdge Success.");
-            //return;
+            ErrorCode err;
+     
+            if (StartNodeName.Text.Trim() == "")
+            {
+                ShowStatus("Add Edge Failed. Start node shouldn't be empty.");
+                return;
+            }
+            string fromName = StartNodeName.Text.Trim();
+            if (EndNodeName.Text.Trim() == "")
+            {
+                ShowStatus("Add Edge Failed. Target node shouldn't be empty.");
+                return;
+            }
+            string toName = EndNodeName.Text.Trim();
+            if (EdgeAttributeBox.Text.Trim() == "")
+            {
+                ShowStatus("Add Edge Failed. Attribute of Edge shouldn't be empty.");
+                return;
+            }
+            string edgeAttrib = EdgeAttributeBox.Text.Trim();
+            if ( EdgeValueBox.Text.Trim() == "" )
+            {
+                ShowStatus("Add Edge Failed. Value of Edge shouldn't be empty.");
+                return;
+            }
+            string edgeValue = EdgeValueBox.Text.Trim();
+            IEdge newEdge = new Edge( edgeAttrib, edgeValue );
+            myGdb.AddEdge( fromName, toName, newEdge, out err);
+            if (err != ErrorCode.NoError)
+            {
+                switch (err)
+                {
+                    case ErrorCode.NodeNotExists:
+                        ShowStatus("Add Edge Failed, End Node not exists.");
+                        break;
+                    case ErrorCode.EdgeExists:
+                        ShowStatus("Add Edge Failed, Edge already exists.");
+                        break;
+                    default:
+                        ShowStatus("Add Edge Failed, error code:" + err);
+                        break;
+                }
+                return;
+            }
+            GraphEdgeUpdate();
+            ShowStatus("Add Edge Successed.");
         }
 
         //修改连边命令执行函数
         private void ModifyEdgeCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            //Todo
-            //string strKey, strValue;
+            if (StartNodeName.Text.Trim() == "")
+            {
+                ShowStatus("Add Edge Failed. Start node shouldn't be empty.");
+                return;
+            }
+            string fromName = StartNodeName.Text.Trim();
+            if (EndNodeName.Text.Trim() == "")
+            {
+                ShowStatus("Add Edge Failed. Target node shouldn't be empty.");
+                return;
+            }
+            string toName = EndNodeName.Text.Trim();
+            if (EdgeAttributeBox.Text.Trim() == "")
+            {
+                ShowStatus("Add Edge Failed. Attribute of Edge shouldn't be empty.");
+                return;
+            }
+            string edgeAttrib = EdgeAttributeBox.Text.Trim();
+            if (EdgeValueBox.Text.Trim() == "")
+            {
+                ShowStatus("Add Edge Failed. Value of Edge shouldn't be empty.");
+                return;
+            }
+            string edgeValue = EdgeValueBox.Text.Trim();
 
-            //strKey = EdgeKeyBox.Text;
-            //strValue = EdgeValueBox.Text;
-            //if (strKey == "" || strValue == "")
-            //{
-            //    ShowStatus("Modify IEdge Failed, Key or Value field can't be empty.");
-            //    return;
-            //}
-            //if (myCurModifyEdge == null)
-            //{
-            //    ShowStatus("Modify IEdge Failed, no IEdge be selected.");
-            //    return;
-            //}
-            //myCurModifyEdge.Type = strKey;
-            //myCurModifyEdge.Value = strValue;
-            ShowStatus("Modify IEdge Success.");
-            return;
+            myCurModifyEdge = myGdb.GetEdgeByType( fromName, toName, edgeAttrib );
+            if (myCurModifyEdge == null)
+            {
+                ShowStatus("Modify Edge Failed, no Edge be selected.");
+                return;
+            }
+            myCurModifyEdge.Value = edgeValue;
+            ShowStatus("Modify Edge Success.");
         }
-        
-        //移除节点命令执行函数
-        private void RemoveNodeCommand_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            //Todo
-            //ErrorCode err = ErrorCode.NoError;
-            //string strName, strType;
 
-            //strName = RemoveNodeName.Text;
-            //strType = RemoveNodeType.Text;
-            //if (strName == "" || strType == "")
-            //{
-            //    ShowStatus("Name or Type of INode can't be empty.");
-            //    return;
-            //}
-            //myGdb.RemoveNodeData(strName, strType, ref err);
-            //if (err != ErrorCode.NoError)
-            //{
-            //    ShowStatus("Remove INode failed, INode not exists.");
-            //    return;
-            //}
-            //ShowStatus("Remove INode Success.");
-            //GraphNodeUpdate();
-            //return;
-        }
-        
         //移除连边命令执行函数
         private void RemoveEdgeCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            //Todo
-            //ErrorCode err = ErrorCode.NoError;
-            //string strStartName, strStartType, strEndName, strEndType;
+            ErrorCode err;
+            if (StartNodeName.Text.Trim() == "")
+            {
+                ShowStatus("Add Edge Failed. Start node shouldn't be empty.");
+                return;
+            }
+            string fromName = StartNodeName.Text.Trim();
+            if (EndNodeName.Text.Trim() == "")
+            {
+                ShowStatus("Add Edge Failed. Target node shouldn't be empty.");
+                return;
+            }
+            string toName = EndNodeName.Text.Trim();
+            if (EdgeAttributeBox.Text.Trim() == "")
+            {
+                ShowStatus("Add Edge Failed. Attribute of Edge shouldn't be empty.");
+                return;
+            }
+            string edgeAttrib = EdgeAttributeBox.Text.Trim();
 
-            //strStartName = RemoveStartName.Text;
-            //strStartType = RemoveStartType.Text;
-            //strEndName = RemoveEndName.Text;
-            //strEndType = RemoveEndType.Text;
-            //if (strStartName == "" ||
-            //    strStartType == "" ||
-            //    strEndName == "" ||
-            //    strEndType == "")
-            //{
-            //    ShowStatus("Name or Type of Nodes can't be empty.");
-            //    return;
-            //}
-            //myGdb.RemoveEdgeData(strStartName, strStartType, strEndName, strEndType, "", ref err);
-            //if (err != ErrorCode.NoError)
-            //{
-            //    switch (err)
-            //    {
-            //        case ErrorCode.NodeNotExists:
-            //            ShowStatus("Remove IEdge failed, Start INode or End INode not exists.");
-            //            break;
-            //        case ErrorCode.EdgeNotExists:
-            //            ShowStatus("Remove IEdge failed, IEdge not exists.");
-            //            break;
-            //        default:
-            //            ShowStatus("Remove IEdge failed, error code:" + err.ToString());
-            //            break;
-            //    }
-            //    return;
-            //}
-            //ShowStatus("Remove IEdge Success.");
-            //GraphEdgeUpdate();
-            return;
-        }
-
-        private void AddEdgeCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = myIsDbAvailable;
-        }
-
-        private void ModifyEdgeCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = myIsDbAvailable;
+            myGdb.RemoveEdge(fromName, toName, edgeAttrib, out err);
+            if (err != ErrorCode.NoError)
+            {
+                switch (err)
+                {
+                    case ErrorCode.NodeNotExists:
+                        ShowStatus("Remove Edge failed, Start Node or End Node not exists.");
+                        break;
+                    case ErrorCode.EdgeNotExists:
+                        ShowStatus("Remove Edge failed, IEdge not exists.");
+                        break;
+                    default:
+                        ShowStatus("Remove Edge failed, error code:" + err);
+                        break;
+                }
+                return;
+            }
+            ShowStatus("Remove IEdge Success.");
+            GraphEdgeUpdate();
         }
 
         private void RemoveNodeCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = myIsDbAvailable;
+            if (myIsDbAvailable == false)
+            {
+                e.CanExecute = false;
+                return;
+            }
+            if (myCurModifyNode == null)
+            {
+                e.CanExecute = false;
+                return;
+            }
+            e.CanExecute = true;
+        }
+
+        private void AddEdgeCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            if (myIsDbAvailable == false)
+            {
+                e.CanExecute = false;
+                return;
+            }
+            if (myCurModifyNode == null)
+            {
+                e.CanExecute = false;
+                return;
+            }
+            e.CanExecute = true;
+        }
+
+        private void ModifyEdgeCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            if (myIsDbAvailable == false)
+            {
+                e.CanExecute = false;
+                return;
+            }
+            if (myCurModifyNode == null)
+            {
+                e.CanExecute = false;
+                return;
+            }
+            if( myCurModifyEdge == null )
+            {
+                e.CanExecute = false;
+                return;
+            }
+            e.CanExecute = true;
         }
 
         private void RemoveEdgeCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = myIsDbAvailable;
+            if (myIsDbAvailable == false)
+            {
+                e.CanExecute = false;
+                return;
+            }
+            if (myCurModifyNode == null)
+            {
+                e.CanExecute = false;
+                return;
+            }
+            if (myCurModifyEdge == null)
+            {
+                e.CanExecute = false;
+                return;
+            }
+            e.CanExecute = true;
         }
         #endregion
     }

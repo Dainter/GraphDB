@@ -26,7 +26,14 @@ namespace GraphDB.Core
             set
             {
                 myFromNode = value;
-                myFromGuid = value.Guid;
+                if( value != null )
+                {
+                    myFromGuid = value.Guid;
+                }
+                else
+                {
+                    myFromGuid = "";
+                }
             }
         }
         public INode To
@@ -38,7 +45,15 @@ namespace GraphDB.Core
             set
             {
                 myToNode = value;
-                myToGuid = value.Guid;
+                if (value != null)
+                {
+                    myToGuid = value.Guid;
+                }
+                else
+                {
+                    myToGuid = "";
+                }
+                
             }
         }
         [Serializable]

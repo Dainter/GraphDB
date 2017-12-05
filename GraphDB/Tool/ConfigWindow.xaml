@@ -120,6 +120,44 @@
                     <r:RibbonButton Label="Refresh" Command="{StaticResource RefreshCommand}" SmallImageSource="/GraphDB;component/Tool/images/Refresh_16x16.png"></r:RibbonButton>
                 </r:RibbonQuickAccessToolBar>
             </r:Ribbon.QuickAccessToolBar>
+            <r:RibbonTab Name = "RibHomeTab" Header="Home" >
+                <r:RibbonGroup Header="File" GroupSizeDefinitions="{StaticResource RibbonLayout}">
+                    <r:RibbonButton Label="New" Command="{StaticResource NewCommand}" LargeImageSource="/GraphDB;component/Tool/images/FileNew.png" SmallImageSource="/GraphDB;component/Tool/images/FileNew_16x16.png" ToolTipTitle="New" ToolTipDescription="{StaticResource NewTip}"></r:RibbonButton>
+                    <r:RibbonButton Label="Open" Command ="{StaticResource OpenCommand}" LargeImageSource="/GraphDB;component/Tool/images/FileOpen.png" SmallImageSource="/GraphDB;component/Tool/images/FileOpen_small.png" ToolTipTitle="Open" ToolTipDescription="{StaticResource OpenTip}"></r:RibbonButton>
+                    <r:RibbonButton Label="Close" Command="{StaticResource CloseCommand}" LargeImageSource="/GraphDB;component/Tool/images/FileClose.png" SmallImageSource="/GraphDB;component/Tool/images/File_close_small.png" ToolTipTitle="Close Database" ToolTipDescription="{StaticResource CloseDbTip}"></r:RibbonButton>
+                    <r:RibbonSplitButton Label="Save" Command="{StaticResource SaveCommand}" LargeImageSource="/GraphDB;component/Tool/images/FileSave.png" SmallImageSource="/GraphDB;component/Tool/images/FileSave_16x16.png" IsDropDownOpen="False" CanAddToQuickAccessToolBarDirectly="False">
+                        <r:RibbonSplitButton.Items>
+                            <r:RibbonButton Label="Save" Command="{StaticResource SaveCommand}" LargeImageSource="/GraphDB;component/Tool/images/FileSave.png" SmallImageSource="/GraphDB;component/Tool/images/FileSave_16x16.png" ToolTipTitle="Save" ToolTipDescription="{StaticResource SaveTip}"></r:RibbonButton>
+                            <r:RibbonButton Label="Save As" Command="{StaticResource SaveAsCommand}" LargeImageSource="/GraphDB;component/Tool/images/FileSaveAs.png" SmallImageSource="/GraphDB;component/Tool/images/FileSave_16x16.png" ToolTipTitle="Save As" ToolTipDescription="{StaticResource SaveAsTip}"></r:RibbonButton>
+                        </r:RibbonSplitButton.Items>
+                    </r:RibbonSplitButton>
+                </r:RibbonGroup>
+                <r:RibbonGroup Header="Print" GroupSizeDefinitions="{StaticResource RibbonLayout}" LargeImageSource="/GraphDB;component/Tool/images/FilePrint.png">
+                    <r:RibbonButton Label="Quick Print" Command="{StaticResource QuickPrintCommand}" LargeImageSource="/GraphDB;component/Tool/images/FilePrintQuick.png" SmallImageSource="/GraphDB;component/Tool/images/FilePrintQuick_small.png" ToolTipTitle="Quick Print" ToolTipDescription="{StaticResource QuickPrintTip}"></r:RibbonButton>
+                    <r:RibbonButton Label="Print Preview" Command="{StaticResource PrintPreviewCommand}" LargeImageSource="/GraphDB;component/Tool/images/FilePrintPreview.png" SmallImageSource="/GraphDB;component/Tool/images/FilePrintPreview_small.png" ToolTipTitle="Print Preview" ToolTipDescription="{StaticResource PrintPreviewTip}"></r:RibbonButton>
+                    <r:RibbonButton Label="Print" Command="{StaticResource PrintCommand}" LargeImageSource="/GraphDB;component/Tool/images/FilePrint.png" SmallImageSource="/GraphDB;component/Tool/images/FilePrint_small.png" ToolTipTitle="Print" ToolTipDescription="{StaticResource PrintTip}"></r:RibbonButton>
+                </r:RibbonGroup>
+                <r:RibbonGroup Header="Clear" LargeImageSource="/GraphDB;component/Tool/images/ClearText.png">
+                    <r:RibbonSplitButton Label="Clear" Command="{StaticResource ClearComCommand}" LargeImageSource="/GraphDB;component/Tool/images/ClearText.png" SmallImageSource="/GraphDB;component/Tool/images/ClearText_16x16.png" CanAddToQuickAccessToolBarDirectly="False">
+                        <r:RibbonSplitButton.Items>
+                            <r:RibbonButton Label="Clear Command" Command="{StaticResource ClearComCommand}" LargeImageSource="/GraphDB;component/Tool/images/ClearText.png" SmallImageSource="/GraphDB;component/Tool/images/ClearText_16x16.png" ToolTipTitle="Clear Command" ToolTipDescription="{StaticResource ClearCommandTip}"></r:RibbonButton>
+                            <r:RibbonButton Label="Clear Result" Command="{StaticResource ClearResultCommand}" LargeImageSource="/GraphDB;component/Tool/images/ClearText.png" SmallImageSource="/GraphDB;component/Tool/images/ClearText_16x16.png" ToolTipTitle="Clear Result" ToolTipDescription="{StaticResource ClearResultTip}"></r:RibbonButton>
+                        </r:RibbonSplitButton.Items>
+                    </r:RibbonSplitButton>
+                </r:RibbonGroup>
+                <r:RibbonGroup Header="Styles" LargeImageSource="/GraphDB;component/Tool/images/NodeStyles.png">
+                    <r:RibbonSplitButton Label="Node Style" LargeImageSource="/GraphDB;component/Tool/images/NodeStyles.png" SmallImageSource="/GraphDB;component/Tool/images/NodeStyles_16x16.png" CanAddToQuickAccessToolBarDirectly="False">
+                        <r:RibbonGallery x:Name="NodeStyleSelection" MaxColumnCount="1" ColumnsStretchToFill="True" SelectionChanged="NodeStyleSelection_SelectionChanged">
+                            <r:RibbonGalleryCategory>
+                                <r:RibbonGalleryItem Template="{StaticResource DefaultNodeTemplate}" ToolTipTitle="默认样式" ToolTipDescription="{StaticResource DefaultStyleTip}">节点</r:RibbonGalleryItem>
+                                <r:RibbonGalleryItem Template="{StaticResource PurpleNodeTemplate}" ToolTipTitle="深邃星空" ToolTipDescription="{StaticResource PurpleStyleTip}">节点</r:RibbonGalleryItem>
+                                <r:RibbonGalleryItem Template="{StaticResource BlueNodeTemplate}" ToolTipTitle="底比斯之水" ToolTipDescription="{StaticResource BlueStyleTip}">节点</r:RibbonGalleryItem>
+                                <r:RibbonGalleryItem Template="{StaticResource PinkNodeTemplate}" ToolTipTitle="千本樱" ToolTipDescription="{StaticResource PinkStyleTip}">节点</r:RibbonGalleryItem>
+                            </r:RibbonGalleryCategory>
+                        </r:RibbonGallery>
+                    </r:RibbonSplitButton>
+                </r:RibbonGroup>
+            </r:RibbonTab>
             <r:RibbonTab Name="RibGraphTab" Header ="Graph">
                 <r:RibbonGroup Header="Node" LargeImageSource="/GraphDB;component/Tool/images/RemoveNode.png">
                     <Grid Height="64" Margin="5">
@@ -166,44 +204,6 @@
                     <r:RibbonButton Name="AddEdgeButton" Label="Add Edge" Command="{StaticResource AddEdgeCommand}" LargeImageSource="/GraphDB;component/Tool/images/AddEdge.png" SmallImageSource="/GraphDB;component/Tool/images/AddEdge_small.png" ToolTipTitle="Add Edge" ToolTipDescription="{StaticResource AddEdgeTip}"></r:RibbonButton>
                     <r:RibbonButton Name="ModifyEdgeButton" Label="Modify Edge" Command="{StaticResource ModifyEdgeCommand}" LargeImageSource="/GraphDB;component/Tool/images/Modify.png" SmallImageSource="/GraphDB;component/Tool/images/Modify_small.png" ToolTipTitle="Modify Edge" ToolTipDescription="{StaticResource ModifyEdgeTip}"></r:RibbonButton>
                     <r:RibbonButton Name="RemoveEdgeButton" Label="Remove Edge" Command ="{StaticResource RemoveEdgeCommand}" LargeImageSource="/GraphDB;component/Tool/images/RemoveEdge.png" SmallImageSource="/GraphDB;component/Tool/images/RemoveEdge_small.png" ToolTipTitle="Remove Edge" ToolTipDescription="{StaticResource RemoveEdgeTip}"></r:RibbonButton>
-                </r:RibbonGroup>
-            </r:RibbonTab>
-            <r:RibbonTab Name = "RibHomeTab" Header="Home" >
-                <r:RibbonGroup Header="File" GroupSizeDefinitions="{StaticResource RibbonLayout}">
-                    <r:RibbonButton Label="New" Command="{StaticResource NewCommand}" LargeImageSource="/GraphDB;component/Tool/images/FileNew.png" SmallImageSource="/GraphDB;component/Tool/images/FileNew_16x16.png" ToolTipTitle="New" ToolTipDescription="{StaticResource NewTip}"></r:RibbonButton>
-                    <r:RibbonButton Label="Open" Command ="{StaticResource OpenCommand}" LargeImageSource="/GraphDB;component/Tool/images/FileOpen.png" SmallImageSource="/GraphDB;component/Tool/images/FileOpen_small.png" ToolTipTitle="Open" ToolTipDescription="{StaticResource OpenTip}"></r:RibbonButton>
-                    <r:RibbonButton Label="Close" Command="{StaticResource CloseCommand}" LargeImageSource="/GraphDB;component/Tool/images/FileClose.png" SmallImageSource="/GraphDB;component/Tool/images/File_close_small.png" ToolTipTitle="Close Database" ToolTipDescription="{StaticResource CloseDbTip}"></r:RibbonButton>
-                    <r:RibbonSplitButton Label="Save" Command="{StaticResource SaveCommand}" LargeImageSource="/GraphDB;component/Tool/images/FileSave.png" SmallImageSource="/GraphDB;component/Tool/images/FileSave_16x16.png" IsDropDownOpen="False" CanAddToQuickAccessToolBarDirectly="False">
-                        <r:RibbonSplitButton.Items>
-                            <r:RibbonButton Label="Save" Command="{StaticResource SaveCommand}" LargeImageSource="/GraphDB;component/Tool/images/FileSave.png" SmallImageSource="/GraphDB;component/Tool/images/FileSave_16x16.png" ToolTipTitle="Save" ToolTipDescription="{StaticResource SaveTip}"></r:RibbonButton>
-                            <r:RibbonButton Label="Save As" Command="{StaticResource SaveAsCommand}" LargeImageSource="/GraphDB;component/Tool/images/FileSaveAs.png" SmallImageSource="/GraphDB;component/Tool/images/FileSave_16x16.png" ToolTipTitle="Save As" ToolTipDescription="{StaticResource SaveAsTip}"></r:RibbonButton>
-                        </r:RibbonSplitButton.Items>
-                    </r:RibbonSplitButton>
-                </r:RibbonGroup>
-                <r:RibbonGroup Header="Print" GroupSizeDefinitions="{StaticResource RibbonLayout}" LargeImageSource="/GraphDB;component/Tool/images/FilePrint.png">
-                    <r:RibbonButton Label="Quick Print" Command="{StaticResource QuickPrintCommand}" LargeImageSource="/GraphDB;component/Tool/images/FilePrintQuick.png" SmallImageSource="/GraphDB;component/Tool/images/FilePrintQuick_small.png" ToolTipTitle="Quick Print" ToolTipDescription="{StaticResource QuickPrintTip}"></r:RibbonButton>
-                    <r:RibbonButton Label="Print Preview" Command="{StaticResource PrintPreviewCommand}" LargeImageSource="/GraphDB;component/Tool/images/FilePrintPreview.png" SmallImageSource="/GraphDB;component/Tool/images/FilePrintPreview_small.png" ToolTipTitle="Print Preview" ToolTipDescription="{StaticResource PrintPreviewTip}"></r:RibbonButton>
-                    <r:RibbonButton Label="Print" Command="{StaticResource PrintCommand}" LargeImageSource="/GraphDB;component/Tool/images/FilePrint.png" SmallImageSource="/GraphDB;component/Tool/images/FilePrint_small.png" ToolTipTitle="Print" ToolTipDescription="{StaticResource PrintTip}"></r:RibbonButton>
-                </r:RibbonGroup>
-                <r:RibbonGroup Header="Clear" LargeImageSource="/GraphDB;component/Tool/images/ClearText.png">
-                    <r:RibbonSplitButton Label="Clear" Command="{StaticResource ClearComCommand}" LargeImageSource="/GraphDB;component/Tool/images/ClearText.png" SmallImageSource="/GraphDB;component/Tool/images/ClearText_16x16.png" CanAddToQuickAccessToolBarDirectly="False">
-                        <r:RibbonSplitButton.Items>
-                            <r:RibbonButton Label="Clear Command" Command="{StaticResource ClearComCommand}" LargeImageSource="/GraphDB;component/Tool/images/ClearText.png" SmallImageSource="/GraphDB;component/Tool/images/ClearText_16x16.png" ToolTipTitle="Clear Command" ToolTipDescription="{StaticResource ClearCommandTip}"></r:RibbonButton>
-                            <r:RibbonButton Label="Clear Result" Command="{StaticResource ClearResultCommand}" LargeImageSource="/GraphDB;component/Tool/images/ClearText.png" SmallImageSource="/GraphDB;component/Tool/images/ClearText_16x16.png" ToolTipTitle="Clear Result" ToolTipDescription="{StaticResource ClearResultTip}"></r:RibbonButton>
-                        </r:RibbonSplitButton.Items>
-                    </r:RibbonSplitButton>
-                </r:RibbonGroup>
-                <r:RibbonGroup Header="Styles" LargeImageSource="/GraphDB;component/Tool/images/NodeStyles.png">
-                    <r:RibbonSplitButton Label="Node Style" LargeImageSource="/GraphDB;component/Tool/images/NodeStyles.png" SmallImageSource="/GraphDB;component/Tool/images/NodeStyles_16x16.png" CanAddToQuickAccessToolBarDirectly="False">
-                        <r:RibbonGallery x:Name="NodeStyleSelection" MaxColumnCount="1" ColumnsStretchToFill="True" SelectionChanged="NodeStyleSelection_SelectionChanged">
-                            <r:RibbonGalleryCategory>
-                                <r:RibbonGalleryItem Template="{StaticResource DefaultNodeTemplate}" ToolTipTitle="默认样式" ToolTipDescription="{StaticResource DefaultStyleTip}">节点</r:RibbonGalleryItem>
-                                <r:RibbonGalleryItem Template="{StaticResource PurpleNodeTemplate}" ToolTipTitle="深邃星空" ToolTipDescription="{StaticResource PurpleStyleTip}">节点</r:RibbonGalleryItem>
-                                <r:RibbonGalleryItem Template="{StaticResource BlueNodeTemplate}" ToolTipTitle="底比斯之水" ToolTipDescription="{StaticResource BlueStyleTip}">节点</r:RibbonGalleryItem>
-                                <r:RibbonGalleryItem Template="{StaticResource PinkNodeTemplate}" ToolTipTitle="千本樱" ToolTipDescription="{StaticResource PinkStyleTip}">节点</r:RibbonGalleryItem>
-                            </r:RibbonGalleryCategory>
-                        </r:RibbonGallery>
-                    </r:RibbonSplitButton>
                 </r:RibbonGroup>
             </r:RibbonTab>
         </r:Ribbon>
