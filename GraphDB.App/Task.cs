@@ -1,5 +1,6 @@
 ﻿using System.Xml;
 
+using GraphDB.Constructor.Semantic.Utility;
 using GraphDB.Contract.Core;
 using GraphDB.Contract.Serial;
 using GraphDB.Core;
@@ -11,7 +12,7 @@ namespace GraphDB.App
     {
         private readonly string myTitle;
 
-        [Serializable]
+        [XmlSerializable]
         public string Title => myTitle;
 
         public Task( string name ) : base( name )
