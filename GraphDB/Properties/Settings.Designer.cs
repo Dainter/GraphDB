@@ -23,20 +23,12 @@ namespace GraphDB.Properties {
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
-<ArrayOfString xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
-  <string>GraphDB.dll</string>
-  <string>GraphDB.Constructor.Semantic.dll</string>
-  <string>GraphDB.App.exe</string>
-</ArrayOfString>")]
-        public global::System.Collections.Specialized.StringCollection SerialAssemblyList {
+        [global::System.Configuration.DefaultSettingValueAttribute("GraphDB.Config.xml")]
+        public string GraphDBConfigPath {
             get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["SerialAssemblyList"]));
-            }
-            set {
-                this["SerialAssemblyList"] = value;
+                return ((string)(this["GraphDBConfigPath"]));
             }
         }
     }

@@ -1,0 +1,7 @@
+﻿<Settings>
+  <SerialAssemblyList name="SerialAssemblyList">
+    <string>GraphDB.dll</string>
+    <string>GraphDB.Constructor.Semantic.dll</string>
+	  <string>GraphDB.App.exe</string>
+  </SerialAssemblyList>
+</Settings>
